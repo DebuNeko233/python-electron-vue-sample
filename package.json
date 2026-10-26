@@ -6,7 +6,7 @@
   "main": "./out/main/index.js",
   "scripts": {
     "dev": "node scripts/dev.mjs",
-    "dev:combined": "electron-vite dev",
+    "dev:combined": "node scripts/combined.mjs",
     "dev:frontend": "electron-vite dev",
     "dev:backend": "node scripts/python.mjs run",
     "setup": "node scripts/python.mjs setup",

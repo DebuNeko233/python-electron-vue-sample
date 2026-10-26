@@ -47,6 +47,10 @@ async function runDemo(): Promise<void> {
   }
 }
 
+async function openLogs(): Promise<void> {
+  try { await window.desktop.system.openLogs() } catch (caught) { error.value = String(caught) }
+}
+
 async function selectFile(): Promise<void> {
   selectedFile.value = (await window.desktop.system.selectFile()) ?? '已取消选择'
 }
@@ -127,7 +131,7 @@ onUnmounted(() => {
             <p v-if="!events.length" class="muted">等待 WebSocket 事件…</p>
             <p v-for="(event, index) in events" :key="index">{{ event }}</p>
           </div>
-          <button class="text-button" @click="window.desktop.system.openLogs()">打开日志目录</button>
+          <button class="text-button" @click="openLogs">打开日志目录</button>
         </section>
       </div>
       <p v-if="error" class="error">{{ error }}</p>

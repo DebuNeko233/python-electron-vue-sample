@@ -78,8 +78,11 @@ try {
 
   fs.rmSync(finalBackend, { recursive: true, force: true })
   fs.renameSync(staging, finalBackend)
-  run('pnpm', ['exec', 'electron-vite', 'build'])
-  run('pnpm', ['exec', 'electron-builder', '--win', '--dir', '--x64'])
+  const isPnpm = (process.env.npm_config_user_agent ?? '').startsWith('pnpm/')
+  const packageManager = isPnpm ? 'pnpm' : 'npm'
+  const prefix = isPnpm ? ['exec'] : ['exec', '--']
+  run(packageManager, [...prefix, 'electron-vite', 'build'])
+  run(packageManager, [...prefix, 'electron-builder', '--win', '--dir', '--x64'])
   console.log('Portable Windows directory: dist/win-unpacked')
 } catch (error) {
   console.error('[build] Failed:', error)

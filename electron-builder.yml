@@ -10,7 +10,4 @@ extraResources:
   - from: build/backend
     to: backend
 win:
-  target:
-    - target: dir
-      arch:
-        - x64
+  artifactName: SampleApp-${version}-${arch}.${ext}
