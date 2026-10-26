@@ -74,7 +74,9 @@ try {
   run('uv', ['pip', 'install', '--python', python, '--system', '--break-system-packages', '--no-deps', backend], { env })
   run(python, ['-I', '-c', 'import fastapi, uvicorn, loguru, sample_backend; print("Backend import passed")'])
 
-  const relativePython = path.relative(staging, python).replaceAll('\\', '/')
+  // uv may create a version alias/junction that electron-builder does not copy.
+  // Store the real versioned path that will exist after packaging.
+  const relativePython = path.relative(staging, fs.realpathSync(python)).replaceAll('\\', '/')
   fs.writeFileSync(path.join(staging, 'manifest.json'), JSON.stringify({
     python: relativePython,
     python_version: pythonVersion,
