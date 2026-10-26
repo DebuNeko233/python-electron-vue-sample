@@ -60,3 +60,5 @@ pnpm build
 初次 `uv sync` 会生成 `backend/uv.lock`，初次 `pnpm install` 会生成 `pnpm-lock.yaml`。
 请将两个锁文件提交到仓库以便团队复现依赖版本。
 第一版聚焦 Windows x64 的通用软件；CUDA、摄像头驱动、厂商 SDK 和额外 DLL 需要业务项目单独测试。
+
+Windows 的 GitHub Actions 成功运行后，可在该运行的 Artifacts 下载 `SampleApp-windows-x64`，解压后双击 `SampleApp.exe`。

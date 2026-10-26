@@ -1,5 +1,8 @@
 name: quality
 
+permissions:
+  contents: write  # temporary: commit initial dependency lockfiles
+
 on:
   push:
     branches: [main]
@@ -23,6 +26,13 @@ jobs:
       - run: pnpm build
       - name: Smoke-test packaged Python (HTTP / WebSocket / shutdown)
         run: node scripts/smoke-backend.mjs
+      - name: Upload portable Windows application
+        uses: actions/upload-artifact@v4
+        with:
+          name: SampleApp-windows-x64
+          path: dist/win-unpacked/
+          if-no-files-found: error
+          compression-level: 3
       - name: Verify bundled Python
         shell: pwsh
         run: |
@@ -33,6 +43,19 @@ jobs:
           if (!(Test-Path $python)) { throw "Bundled Python missing: $python" }
           & $python -I -c "import sample_backend, fastapi, uvicorn, loguru; print('Bundled runtime OK')"
           if ($LASTEXITCODE -ne 0) { throw "Bundled Python failed" }
+      - name: Commit initial reproducible dependency locks
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        shell: pwsh
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add backend/uv.lock pnpm-lock.yaml
+          git diff --cached --quiet
+          if ($LASTEXITCODE -ne 0) {
+            git commit -m 'chore: record initial uv and pnpm dependency locks'
+            git push origin HEAD:main
+            if ($LASTEXITCODE -ne 0) { throw 'Could not commit dependency lockfiles' }
+          }
 
   test-linux:
     runs-on: ubuntu-latest
