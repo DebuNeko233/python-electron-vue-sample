@@ -41,6 +41,11 @@ export class BackendManager {
 
   get status(): BackendStatus { return this.currentStatus }
   get token(): string { return this.sessionToken }
+
+  connected(): void { this.change('ready') }
+  disconnected(): void {
+    if (!app.isPackaged && !this.stopping) this.change('offline')
+  }
   get baseUrl(): string {
     if (!this.endpoint) throw new Error('Python backend is not ready')
     return this.endpoint

@@ -6,6 +6,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { BackendManager } from './backend-manager'
 import { EventStream } from './event-stream'
+import { installLogging } from './logging'
 import type { BackendStatus } from '../shared/bridge'
 
 const mainDirectory = path.dirname(fileURLToPath(import.meta.url))
@@ -92,7 +93,9 @@ function createWindow(): void {
   mainWindow.webContents.setWindowOpenHandler(() => ({ action: 'deny' }))
   mainWindow.webContents.on('will-navigate', (event, url) => {
     const developmentUrl = process.env.ELECTRON_RENDERER_URL
-    if (!url.startsWith('file://') && !(developmentUrl && url.startsWith(developmentUrl))) {
+    const indexFile = path.join(mainDirectory, '../renderer/index.html')
+    const allowedFile = new URL('file://' + indexFile.replaceAll('\\', '/')).href
+    if (url !== allowedFile && !(developmentUrl && url.startsWith(developmentUrl))) {
       event.preventDefault()
     }
   })
@@ -128,6 +131,7 @@ app.on('before-quit', (event) => {
 
 app.whenReady().then(() => {
   if (!app.hasSingleInstanceLock()) return
+  installLogging()
   registerIpc()
   createWindow()
   void startBackend()

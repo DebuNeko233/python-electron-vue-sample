@@ -29,7 +29,10 @@ export class EventStream {
     const headers = this.backend.token ? { 'x-session-token': this.backend.token } : {}
     const socket = new WebSocket(url, { headers })
     this.socket = socket
-    socket.on('open', () => { this.retries = 0 })
+    socket.on('open', () => {
+      this.retries = 0
+      this.backend.connected()
+    })
     socket.on('message', (data) => {
       try {
         const event = JSON.parse(data.toString()) as BackendEvent
@@ -45,6 +48,7 @@ export class EventStream {
     })
     socket.on('close', () => {
       if (this.socket === socket) this.socket = null
+      this.backend.disconnected()
       this.retryLater()
     })
   }
