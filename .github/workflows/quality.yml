@@ -1,7 +1,7 @@
 name: quality
 
 permissions:
-  contents: write  # temporary: commit initial dependency lockfiles
+  contents: read
 
 on:
   push:
@@ -17,9 +17,11 @@ jobs:
         with:
           node-version: '22'
       - uses: astral-sh/setup-uv@v6
+        with:
+          version: '0.13.5'
       - run: corepack enable
-      - run: pnpm install --no-frozen-lockfile
-      - run: uv sync --project backend --group dev
+      - run: pnpm install --frozen-lockfile
+      - run: uv sync --locked --project backend --group dev
       - run: uv run --project backend pytest -q
       - run: pnpm typecheck
       - run: pnpm exec electron-vite build
@@ -43,19 +45,6 @@ jobs:
           if (!(Test-Path $python)) { throw "Bundled Python missing: $python" }
           & $python -I -c "import sample_backend, fastapi, uvicorn, loguru; print('Bundled runtime OK')"
           if ($LASTEXITCODE -ne 0) { throw "Bundled Python failed" }
-      - name: Commit initial reproducible dependency locks
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        shell: pwsh
-        run: |
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add backend/uv.lock pnpm-lock.yaml
-          git diff --cached --quiet
-          if ($LASTEXITCODE -ne 0) {
-            git commit -m 'chore: record initial uv and pnpm dependency locks'
-            git push origin HEAD:main
-            if ($LASTEXITCODE -ne 0) { throw 'Could not commit dependency lockfiles' }
-          }
 
   test-linux:
     runs-on: ubuntu-latest
@@ -65,9 +54,11 @@ jobs:
         with:
           node-version: '22'
       - uses: astral-sh/setup-uv@v6
+        with:
+          version: '0.13.5'
       - run: corepack enable
-      - run: pnpm install --no-frozen-lockfile
-      - run: uv sync --project backend --group dev
+      - run: pnpm install --frozen-lockfile
+      - run: uv sync --locked --project backend --group dev
       - run: uv run --project backend pytest -q
       - run: pnpm typecheck
       - run: pnpm exec electron-vite build

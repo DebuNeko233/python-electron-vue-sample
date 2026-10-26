@@ -58,7 +58,7 @@ const env = { ...process.env, UV_PYTHON_INSTALL_DIR: runtime, UV_LINK_MODE: 'cop
 
 try {
   // uv.lock is generated once by uv sync and should be committed with the project.
-  run('uv', ['sync', '--project', backend])
+  run('uv', ['sync', '--locked', '--project', backend])
   run('uv', ['python', 'install', pythonVersion], { env })
   const python = findPython(runtime)
   if (!python) throw new Error('uv installed Python, but python.exe was not found')
@@ -88,6 +88,7 @@ try {
   const isPnpm = (process.env.npm_config_user_agent ?? '').startsWith('pnpm/')
   const packageManager = isPnpm ? 'pnpm' : 'npm'
   const prefix = isPnpm ? ['exec'] : ['exec', '--']
+  run(packageManager, ['run', 'typecheck'])
   run(packageManager, [...prefix, 'electron-vite', 'build'])
   run(packageManager, [...prefix, 'electron-builder', '--win', '--dir', '--x64'])
   console.log('Portable Windows directory: dist/win-unpacked')

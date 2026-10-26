@@ -57,8 +57,8 @@ pnpm build
 
 ## 版本与离线依赖
 
-初次 `uv sync` 会生成 `backend/uv.lock`，初次 `pnpm install` 会生成 `pnpm-lock.yaml`。
-请将两个锁文件提交到仓库以便团队复现依赖版本。
+仓库已提交 `backend/uv.lock` 与 `pnpm-lock.yaml`，日常 CI 使用锁定安装校验依赖。
+更改 Python 依赖后由 uv 更新锁文件，并一起提交；不要手工编辑锁文件。
 第一版聚焦 Windows x64 的通用软件；CUDA、摄像头驱动、厂商 SDK 和额外 DLL 需要业务项目单独测试。
 
 Windows 的 GitHub Actions 成功运行后，可在该运行的 Artifacts 下载 `SampleApp-windows-x64`，解压后双击 `SampleApp.exe`。
