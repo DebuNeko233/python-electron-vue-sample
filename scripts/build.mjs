@@ -23,7 +23,7 @@ function run(command, args, options = {}) {
   const result = spawnSync(command, args, {
     cwd: root,
     stdio: 'inherit',
-    shell: process.platform === 'win32',
+    shell: process.platform === 'win32' && (command === 'pnpm' || command === 'npm'),
     ...options,
   })
   if (result.error || result.status !== 0) {

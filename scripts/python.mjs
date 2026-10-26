@@ -17,7 +17,7 @@ function run(args, options = {}) {
   const result = spawnSync('uv', args, {
     cwd: backend,
     stdio: 'inherit',
-    shell: process.platform === 'win32',
+    shell: false,
     ...options,
   })
   if (result.error) {
