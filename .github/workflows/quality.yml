@@ -23,6 +23,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: uv sync --locked --project backend --group dev
       - run: uv run --project backend pytest -q
+      - run: node --test scripts/windows-terminal.test.mjs
       - run: pnpm typecheck
       - run: pnpm exec electron-vite build
       - run: pnpm build
@@ -60,5 +61,6 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: uv sync --locked --project backend --group dev
       - run: uv run --project backend pytest -q
+      - run: node --test scripts/windows-terminal.test.mjs
       - run: pnpm typecheck
       - run: pnpm exec electron-vite build
