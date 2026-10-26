@@ -32,6 +32,9 @@ function run(command, args, options = {}) {
 }
 
 function findPython(directory) {
+  // Prefer the installation's root interpreter, not Lib/venv/scripts/nt/python.exe.
+  const rootPython = path.join(directory, 'python.exe')
+  if (fs.existsSync(rootPython)) return rootPython
   for (const name of fs.readdirSync(directory)) {
     const filename = path.join(directory, name)
     if (fs.statSync(filename).isDirectory()) {
@@ -65,7 +68,7 @@ try {
     'export', '--project', backend, '--locked', '--no-dev',
     '--no-emit-project', '--format', 'requirements-txt', '--output-file', requirements,
   ])
-  run('uv', ['pip', 'sync', '--python', python, '--system', '-r', requirements], { env })
+  run('uv', ['pip', 'sync', '--python', python, '--system', requirements], { env })
   run('uv', ['pip', 'install', '--python', python, '--system', '--no-deps', backend], { env })
   run(python, ['-I', '-c', 'import fastapi, uvicorn, loguru, sample_backend; print("Backend import passed")'])
 
