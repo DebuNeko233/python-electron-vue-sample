@@ -3,7 +3,7 @@
 import { app, BrowserWindow, dialog, ipcMain, shell } from 'electron'
 import fs from 'node:fs'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 import { BackendManager } from './backend-manager'
 import { EventStream } from './event-stream'
 import { installLogging } from './logging'
@@ -94,7 +94,7 @@ function createWindow(): void {
   mainWindow.webContents.on('will-navigate', (event, url) => {
     const developmentUrl = process.env.ELECTRON_RENDERER_URL
     const indexFile = path.join(mainDirectory, '../renderer/index.html')
-    const allowedFile = new URL('file://' + indexFile.replaceAll('\\', '/')).href
+    const allowedFile = pathToFileURL(indexFile).href
     if (url !== allowedFile && !(developmentUrl && url.startsWith(developmentUrl))) {
       event.preventDefault()
     }
