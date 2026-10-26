@@ -1,0 +1,16 @@
+appId: com.example.python-electron-vue-sample
+productName: SampleApp
+asar: true
+directories:
+  output: dist
+files:
+  - out/**
+  - package.json
+extraResources:
+  - from: build/backend
+    to: backend
+win:
+  target:
+    - target: dir
+      arch:
+        - x64

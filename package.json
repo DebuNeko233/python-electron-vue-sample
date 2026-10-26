@@ -1,0 +1,39 @@
+{
+  "name": "python-electron-vue-sample",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./out/main/index.js",
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "dev:combined": "electron-vite dev",
+    "dev:frontend": "electron-vite dev",
+    "dev:backend": "node scripts/python.mjs run",
+    "setup": "node scripts/python.mjs setup",
+    "python:use": "node scripts/python.mjs use",
+    "python:info": "node scripts/python.mjs info",
+    "python:list": "node scripts/python.mjs list",
+    "typecheck": "vue-tsc --noEmit -p tsconfig.web.json && tsc --noEmit -p tsconfig.node.json",
+    "test:backend": "node scripts/python.mjs test",
+    "build": "node scripts/build.mjs",
+    "clean": "node scripts/clean.mjs"
+  },
+  "dependencies": {
+    "vue": "^3.5.0",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^6.0.0",
+    "@types/node": "^22.0.0",
+    "@types/ws": "^8.18.0",
+    "electron": "^38.0.0",
+    "electron-builder": "^26.0.0",
+    "electron-vite": "^4.0.0",
+    "typescript": "^5.9.0",
+    "vite": "^7.0.0",
+    "vue-tsc": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
