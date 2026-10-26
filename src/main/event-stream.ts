@@ -1,0 +1,68 @@
+/** One WebSocket connection shared by all Vue components. */
+
+import WebSocket from 'ws'
+import type { BackendEvent } from '../shared/bridge'
+import { BackendManager } from './backend-manager'
+
+export class EventStream {
+  private socket: WebSocket | null = null
+  private retryTimer: ReturnType<typeof setTimeout> | null = null
+  private closed = false
+  private retries = 0
+
+  constructor(
+    private readonly backend: BackendManager,
+    private readonly publish: (event: BackendEvent) => void,
+  ) {}
+
+  connect(): void {
+    this.closed = false
+    if (this.socket) return
+    let url: string
+    try {
+      url = this.backend.baseUrl.replace(/^http/, 'ws') + '/ws/events'
+    } catch {
+      this.retryLater()
+      return
+    }
+
+    const headers = this.backend.token ? { 'x-session-token': this.backend.token } : {}
+    const socket = new WebSocket(url, { headers })
+    this.socket = socket
+    socket.on('open', () => { this.retries = 0 })
+    socket.on('message', (data) => {
+      try {
+        const event = JSON.parse(data.toString()) as BackendEvent
+        if (typeof event.event === 'string' && typeof event.sequence === 'number') {
+          this.publish(event)
+        }
+      } catch (error) {
+        console.warn('Bad WebSocket message:', error)
+      }
+    })
+    socket.on('error', (error) => {
+      console.warn('Python WebSocket:', error.message)
+    })
+    socket.on('close', () => {
+      if (this.socket === socket) this.socket = null
+      this.retryLater()
+    })
+  }
+
+  private retryLater(): void {
+    if (this.closed || this.retryTimer) return
+    const milliseconds = Math.min(1000 * (2 ** this.retries++), 10_000)
+    this.retryTimer = setTimeout(() => {
+      this.retryTimer = null
+      this.connect()
+    }, milliseconds)
+  }
+
+  stop(): void {
+    this.closed = true
+    if (this.retryTimer) clearTimeout(this.retryTimer)
+    this.retryTimer = null
+    this.socket?.close()
+    this.socket = null
+  }
+}
