@@ -36,6 +36,5 @@
   "engines": {
     "node": ">=22"
   },
-  "packageManager": "pnpm@12.15.0",
   "description": "Portable Electron + Vue + FastAPI starter with uv-managed Python"
 }
