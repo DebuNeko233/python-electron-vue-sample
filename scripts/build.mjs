@@ -68,8 +68,10 @@ try {
     'export', '--project', backend, '--locked', '--no-dev',
     '--no-emit-project', '--format', 'requirements-txt', '--output-file', requirements,
   ])
-  run('uv', ['pip', 'sync', '--python', python, '--system', requirements], { env })
-  run('uv', ['pip', 'install', '--python', python, '--system', '--no-deps', backend], { env })
+  // This interpreter is a fresh, project-owned copy inside build/, never a system Python.
+  // uv marks managed CPython externally managed, so explicit permission is required here.
+  run('uv', ['pip', 'sync', '--python', python, '--system', '--break-system-packages', requirements], { env })
+  run('uv', ['pip', 'install', '--python', python, '--system', '--break-system-packages', '--no-deps', backend], { env })
   run(python, ['-I', '-c', 'import fastapi, uvicorn, loguru, sample_backend; print("Backend import passed")'])
 
   const relativePython = path.relative(staging, python).replaceAll('\\', '/')
