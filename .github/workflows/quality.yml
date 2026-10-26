@@ -1,0 +1,48 @@
+name: quality
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: astral-sh/setup-uv@v6
+      - run: corepack enable
+      - run: pnpm install --no-frozen-lockfile
+      - run: uv sync --project backend --group dev
+      - run: uv run --project backend pytest -q
+      - run: pnpm typecheck
+      - run: pnpm exec electron-vite build
+      - run: pnpm build
+      - name: Verify bundled Python
+        shell: pwsh
+        run: |
+          $manifest = "dist/win-unpacked/resources/backend/manifest.json"
+          if (!(Test-Path $manifest)) { throw "Backend manifest missing" }
+          $config = Get-Content $manifest -Raw | ConvertFrom-Json
+          $python = Join-Path "dist/win-unpacked/resources/backend" $config.python
+          if (!(Test-Path $python)) { throw "Bundled Python missing: $python" }
+          & $python -I -c "import sample_backend, fastapi, uvicorn, loguru; print('Bundled runtime OK')"
+          if ($LASTEXITCODE -ne 0) { throw "Bundled Python failed" }
+
+  test-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: astral-sh/setup-uv@v6
+      - run: corepack enable
+      - run: pnpm install --no-frozen-lockfile
+      - run: uv sync --project backend --group dev
+      - run: uv run --project backend pytest -q
+      - run: pnpm typecheck
+      - run: pnpm exec electron-vite build
