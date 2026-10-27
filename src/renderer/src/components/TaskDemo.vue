@@ -24,6 +24,7 @@ async function refresh(): Promise<void> {
   const requestedId = taskId.value
   try {
     const job = await getDemoTask(requestedId)
+    // 等 HTTP 返回时用户可能已开启另一个任务，旧请求不能覆盖新任务状态。
     if (taskId.value !== requestedId) return
     status.value = job.status
     progress.value = job.progress
@@ -32,6 +33,7 @@ async function refresh(): Promise<void> {
   }
 }
 
+// 后端重新连接后通过 HTTP 恢复权威状态；WebSocket 不保存历史消息。
 watch(() => props.ready, (ready) => {
   if (ready) void refresh()
 })
@@ -42,6 +44,7 @@ watch(() => props.events[0], (message) => {
     void refresh()
     return
   }
+  // 多任务共享事件流，只处理当前组件正在展示的任务。
   if (message.data.task_id !== taskId.value) return
   if (message.event === 'task.progress') {
     progress.value = Number(message.data.progress ?? 0)

@@ -13,6 +13,7 @@ async function chooseFile(): Promise<void> {
   try {
     const chosen = await selectFile()
     selectedFile.value = chosen ?? '已取消选择'
+    // 只记录操作结果，不写用户所选文件的完整路径。
     log.info(chosen === null ? 'File selection cancelled' : 'File selected')
   } catch (caught) {
     error.value = String(caught)

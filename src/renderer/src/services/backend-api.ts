@@ -13,6 +13,7 @@ export interface EchoResult {
   from: string
 }
 
+// API URL 和 IPC 访问集中在 Service，Vue 组件只关心业务参数与返回值。
 export function echoMessage(message: string): Promise<EchoResult> {
   return window.desktop.backend.request<EchoResult>('POST', '/api/echo', { message })
 }

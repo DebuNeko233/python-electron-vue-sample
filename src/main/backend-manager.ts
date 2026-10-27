@@ -6,6 +6,7 @@ import { setTimeout as pause } from 'node:timers/promises'
 import { app } from 'electron'
 import type { BackendStatus } from '../shared/bridge'
 
+// 就绪文件由 Python 原子写入；pid/session_id 防止误连到其他本机服务。
 interface ReadyMessage { port: number; pid: number; session_id: string }
 interface Manifest { python: string }
 
@@ -13,6 +14,7 @@ function exited(child: ChildProcess): boolean {
   return child.exitCode !== null || child.signalCode !== null
 }
 
+// 使用一次性 exit 监听并在超时后移除，防止关闭过程中遗留监听器。
 function waitForExit(child: ChildProcess, ms: number): Promise<boolean> {
   if (exited(child)) return Promise.resolve(true)
   return new Promise((resolve) => {
@@ -60,6 +62,7 @@ export class BackendManager {
     this.notify(status)
   }
 
+  // 不信任清单中的路径：必须解析到随应用分发的 backend 目录内部。
   private packagedPython(): string {
     const root = path.join(process.resourcesPath, 'backend')
     const manifest = JSON.parse(fs.readFileSync(path.join(root, 'manifest.json'), 'utf8')) as Manifest
@@ -73,6 +76,7 @@ export class BackendManager {
   }
 
   async start(): Promise<void> {
+    // 开发时 Python 由单独终端拥有；Electron 只能连接，绝不能代替用户管理它。
     if (!app.isPackaged) {
       this.endpoint = 'http://127.0.0.1:8765'
       try {
@@ -94,6 +98,7 @@ export class BackendManager {
       this.change('failed')
       throw error
     }
+    // 每次启动生成新的会话/控制令牌，前者用于 API，后者仅用于停机。
     const sessionId = randomUUID()
     const startupDirectory = path.join(app.getPath('userData'), 'startup')
     fs.mkdirSync(startupDirectory, { recursive: true })
@@ -101,6 +106,7 @@ export class BackendManager {
     this.sessionToken = randomBytes(32).toString('hex')
     this.controlToken = randomBytes(32).toString('hex')
 
+    // -I 禁用用户级包路径；APP_PARENT_PID 使 Python 能察觉 Electron 意外退出。
     const child = spawn(python, ['-I', '-m', 'sample_backend'], {
       cwd: path.dirname(python),
       windowsHide: true,
@@ -131,6 +137,7 @@ export class BackendManager {
     })
 
     try {
+      // 就绪握手不仅验证端口，还校验进程 PID 与本次随机会话 ID。
       const deadline = Date.now() + 30_000
       while (Date.now() < deadline && !this.stopping) {
         if (failure) throw failure
@@ -142,6 +149,7 @@ export class BackendManager {
             throw new Error('Invalid Python startup handshake')
           }
           this.endpoint = 'http://127.0.0.1:' + ready.port
+          // 有就绪文件不等于 HTTP 已可用；健康检查成功后才报告 ready。
           await this.health()
           this.change('ready')
           return
@@ -176,6 +184,7 @@ export class BackendManager {
   }
 
   async request(method: 'GET' | 'POST', apiPath: string, body?: unknown): Promise<unknown> {
+    // Renderer 提供的路径必须在白名单范围内，避免借主进程发任意本机请求。
     if (!/^\/api\/[a-zA-Z0-9/_-]+$/.test(apiPath) || apiPath.includes('..')) {
       throw new Error('Invalid API path')
     }
@@ -202,6 +211,7 @@ export class BackendManager {
     const child = this.child
     try {
       if (child && !exited(child)) {
+        // 优先请求授权的内部接口优雅关闭；超时后仅终止本进程创建的子进程。
         if (this.endpoint && this.controlToken) {
           try {
             await fetch(this.endpoint + '/internal/shutdown', {

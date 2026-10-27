@@ -15,6 +15,7 @@ let mainWindow: BrowserWindow | null = null
 let closing = false
 let allowQuit = false
 
+// 仅允许一个桌面应用实例，避免重复占用配置和托管多个 Python 进程。
 if (!app.requestSingleInstanceLock()) {
   app.quit()
 } else {
@@ -38,6 +39,7 @@ const stream = new EventStream(backend, (event) => {
   }
 })
 
+// 合并连续点击“重新连接”触发的重试，避免并发重建 WebSocket/Python。
 let retryPromise: Promise<void> | null = null
 
 /** Manual retry also works when the developer started Python after Electron. */
@@ -52,6 +54,7 @@ function retryBackend(): Promise<void> {
   return retryPromise
 }
 
+// 每个 IPC 入口都必须确认消息来自当前窗口的主 frame，拒绝其他内容调用。
 function checkSender(event: Electron.IpcMainInvokeEvent): void {
   if (!mainWindow || mainWindow.isDestroyed() ||
       event.sender !== mainWindow.webContents ||
@@ -60,6 +63,7 @@ function checkSender(event: Electron.IpcMainInvokeEvent): void {
   }
 }
 
+// Renderer 只能调用这些预先批准的 IPC；不能直接使用 Node.js 或传任意命令。
 function registerIpc(): void {
   ipcMain.handle('backend:status', (event) => {
     checkSender(event)
@@ -85,6 +89,7 @@ function registerIpc(): void {
     const selection = await dialog.showOpenDialog(mainWindow!, { properties: ['openFile'] })
     return selection.canceled ? null : selection.filePaths[0]
   })
+  // 日志内容也来自 Renderer，必须校验级别、模块名、长度和控制字符。
   ipcMain.handle('logging:write', (event, level: unknown, source: unknown, message: unknown) => {
     checkSender(event)
     // Renderer content is untrusted: accept only short, single-line, text-only events.
@@ -101,6 +106,7 @@ function registerIpc(): void {
     if (target !== 'python' && target !== 'electron') {
       throw new Error('Invalid log target')
     }
+    // 开发 Python 是独立进程，日志与 Electron 不在同一个目录。
     const directory = app.isPackaged || target === 'electron'
       ? path.join(app.getPath('userData'), 'data', 'logs')
       : path.join(os.homedir(), '.python-electron-vue-sample', 'logs')
@@ -123,6 +129,7 @@ function createWindow(show = true): BrowserWindow {
     minHeight: 600,
     autoHideMenuBar: true,
     backgroundColor: '#f5f7fb',
+    // 只经 Preload 暴露白名单 API：Renderer 保持沙箱、上下文隔离和无 Node 权限。
     webPreferences: {
       preload: path.join(mainDirectory, '../preload/index.cjs'),
       contextIsolation: true,
@@ -130,6 +137,7 @@ function createWindow(show = true): BrowserWindow {
       nodeIntegration: false,
     },
   })
+  // 禁止网页内容擅自打开新窗口或导航至任意外部地址。
   mainWindow.webContents.setWindowOpenHandler(() => ({ action: 'deny' }))
   mainWindow.webContents.on('will-navigate', (event, url) => {
     const developmentUrl = process.env.ELECTRON_RENDERER_URL
@@ -160,6 +168,7 @@ async function startBackend(): Promise<void> {
 }
 
 app.on('window-all-closed', () => app.quit())
+// 正式退出前必须先停 WebSocket 和本应用拥有的 Python，再允许 Electron 真正退出。
 app.on('before-quit', (event) => {
   if (allowQuit || closing) return
   event.preventDefault()
@@ -289,6 +298,7 @@ async function runParentExitSmokeTest(): Promise<void> {
   }
 }
 
+// 冒烟测试只在 CI 打包程序中运行；正常启动才创建可见窗口和后端连接。
 app.whenReady().then(() => {
   if (!app.hasSingleInstanceLock()) return
   installLogging()

@@ -17,6 +17,7 @@ export class EventStream {
 
   connect(): void {
     this.closed = false
+    // 已连接或正在连接时不创建第二条 WebSocket，所有 Vue 组件共享同一通道。
     if (this.socket) return
     let url: string
     try {
@@ -26,6 +27,7 @@ export class EventStream {
       return
     }
 
+    // 打包版 WebSocket 需要与 HTTP 相同的会话令牌；开发版令牌为空。
     const headers = this.backend.token ? { 'x-session-token': this.backend.token } : {}
     const socket = new WebSocket(url, { headers })
     this.socket = socket
@@ -57,6 +59,7 @@ export class EventStream {
 
   private retryLater(): void {
     if (this.closed || this.retryTimer) return
+    // 指数退避，上限 10 秒；不让短暂断网变成密集重连。
     const milliseconds = Math.min(1000 * (2 ** this.retries++), 10_000)
     this.retryTimer = setTimeout(() => {
       this.retryTimer = null
@@ -65,6 +68,7 @@ export class EventStream {
   }
 
   stop(): void {
+    // 显式停止时禁止自动重连，尤其是在 Electron 正在退出时。
     this.closed = true
     if (this.retryTimer) clearTimeout(this.retryTimer)
     this.retryTimer = null

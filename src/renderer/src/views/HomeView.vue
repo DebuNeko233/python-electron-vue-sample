@@ -10,6 +10,7 @@ import { useBackendConnection } from '../composables/useBackendConnection'
 import { useBackendEvents } from '../composables/useBackendEvents'
 
 const props = defineProps<{ activePage: PageId }>()
+// 页面导航只切换内容显示，不销毁任务和表单组件，才能保留状态。
 const currentPage = computed(
   () => navigationItems.find((item) => item.id === props.activePage) ?? navigationItems[0],
 )
