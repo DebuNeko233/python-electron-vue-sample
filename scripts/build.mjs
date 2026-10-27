@@ -9,6 +9,7 @@ import { spawnSync } from 'node:child_process'
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { resolveProcessCommand } from './process-command.mjs'
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const backend = path.join(root, 'backend')
@@ -20,10 +21,11 @@ const pythonVersion = fs.readFileSync(path.join(backend, '.python-version'), 'ut
 
 function run(command, args, options = {}) {
   console.log('[build]', command, ...args)
-  const result = spawnSync(command, args, {
+  const processCommand = resolveProcessCommand(command, args)
+  const result = spawnSync(processCommand.command, processCommand.args, {
     cwd: root,
     stdio: 'inherit',
-    shell: process.platform === 'win32' && (command === 'pnpm' || command === 'npm'),
+    shell: false,
     ...options,
   })
   if (result.error || result.status !== 0) {

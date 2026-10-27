@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+### 修复
+
+- 修复 Windows 下 `pnpm build` 调用 pnpm/npm 时的 Node.js `[DEP0190]` 弃用警告：不再向 `shell: true` 的子进程传入参数数组，改为受限参数的显式 `cmd.exe` 调用，并补充 Windows 回归测试。
+
 ### 文档
 
 - 精简 README，使其专注于项目定位、核心能力、快速启动、构建和学习入口。
