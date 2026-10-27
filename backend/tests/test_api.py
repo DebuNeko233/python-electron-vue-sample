@@ -1,7 +1,7 @@
 """Small tests for the public request contract."""
 
 from fastapi.testclient import TestClient
-from sample_backend.api import app
+from sample_backend.main import app
 
 
 def test_health():

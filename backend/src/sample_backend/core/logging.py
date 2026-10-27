@@ -3,7 +3,7 @@
 import sys
 from loguru import logger
 
-from .settings import data_directory
+from .config import data_directory
 
 
 def configure_logging() -> None:

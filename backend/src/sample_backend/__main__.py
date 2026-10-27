@@ -11,7 +11,7 @@ from pathlib import Path
 import uvicorn
 from loguru import logger
 
-from .api import app
+from .main import app
 
 
 def watch_parent(parent_pid: int, request_stop, done: threading.Event) -> None:
@@ -99,7 +99,7 @@ def main() -> None:
     parser.add_argument("--dev", action="store_true", help="Enable Uvicorn autoreload")
     arguments = parser.parse_args()
     if arguments.dev:
-        uvicorn.run("sample_backend.api:app", host="127.0.0.1", port=8765, reload=True)
+        uvicorn.run("sample_backend.main:app", host="127.0.0.1", port=8765, reload=True)
     else:
         asyncio.run(run_managed(0))
 

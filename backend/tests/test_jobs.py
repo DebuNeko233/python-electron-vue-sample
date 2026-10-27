@@ -2,7 +2,7 @@
 
 import asyncio
 
-from sample_backend.jobs import DemoJobs
+from sample_backend.services.demo_jobs import DemoJobs
 
 
 def test_cancel_running_job():
