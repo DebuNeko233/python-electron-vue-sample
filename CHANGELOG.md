@@ -4,6 +4,11 @@
 
 ## [Unreleased]
 
+### 开发环境改进
+
+- 开发电脑无需预装 uv：先运行 `uv self version` 检测系统命令；没有 uv 时自动从官方 GitHub Releases 下载受 SHA-256 校验的 uv 到项目内 `.tools/uv/`，重复运行复用本地文件。
+- 将同一引导入口接入 `pnpm dev`、后端测试、Python 版本切换及 `pnpm build`，增加下载互斥锁、离线失败提示与 Windows 真实下载验证。绿色发行包不包含 uv。
+
 ### 依赖策略
 
 - 将模板调整为**无跟踪锁文件模式**：移除 `pnpm-lock.yaml` 和 `backend/uv.lock`，禁用 pnpm 锁文件生成，允许 uv 仅在本地生成被忽略的依赖解析文件；`pnpm build` 与 CI 不再要求 `--locked` 或 `--frozen-lockfile`。

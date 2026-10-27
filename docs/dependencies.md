@@ -64,3 +64,7 @@ pnpm build
 ## 测试门槛
 
 `quality.yml` 每次在 Windows 和 Linux 重新解析依赖，验证后端接口、类型检查；Windows 还构建独立 Python 与 Electron 绿色软件、执行 HTTP/WebSocket/菜单/进程清理的完整测试。
+
+## uv 如何安装？
+
+开发机无需预装 uv：由 `scripts/uv-bootstrap.mjs` 先执行 `uv self version`，缺失时自动下载官方 uv 二进制到被 Git 忽略的 `.tools/uv/`。详情见 [uv 自动引导](uv-bootstrap.md)。目标电脑只运行内置 Python，不依赖 uv。

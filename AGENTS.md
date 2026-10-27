@@ -15,7 +15,8 @@ Windows x64 桌面软件样例，不是某个具体业务软件。
 5. [日志规范](docs/logging.md)：Vue/Electron/Python 的日志接口、级别和隐私规则。
 6. [排错手册](docs/troubleshooting.md)：按责任模块定位问题。
 7. [定制与限制](docs/customization.md)：应用标识、资源、依赖、Python 版本。
-8. [架构说明](docs/architecture.md)：进程所有权、数据目录、运行状态。
+8. [uv 自动引导](docs/uv-bootstrap.md)：无系统 uv 时的检测、下载与缓存策略。
+9. [架构说明](docs/architecture.md)：进程所有权、数据目录、运行状态。
 
 先阅读相关代码再改；不要猜测本仓库已经拥有数据库、插件系统或 GPU 构建器。
 
@@ -28,6 +29,7 @@ Windows x64 桌面软件样例，不是某个具体业务软件。
 | Python 算法、后台任务 | `backend/src/sample_backend/services/`，并在 `api/` 暴露接口 |
 | WebSocket 事件 | `services/event_hub.py`、Python 业务 Service、前端 `composables/` |
 | 新桌面权限 | `src/main/index.ts`、`src/preload/index.ts`、`src/shared/bridge.ts`、`services/desktop.ts` |
+| uv 自动引导 / 校验 | `scripts/uv-bootstrap.mjs`、`scripts/uv-bootstrap.test.mjs`；见 [引导指南](docs/uv-bootstrap.md) |
 | 改 Python 版本或依赖 | `backend/.python-version`、`backend/pyproject.toml`（本地 `backend/uv.lock` 不提交） |
 | 打包路径、便携目录 | `scripts/build.mjs`、`electron-builder.yml`、`src/main/backend-manager.ts` |
 | 前端/后端日志 | `src/renderer/src/services/logger.ts`、`src/main/logging.ts`、`backend/src/sample_backend/core/logging.py`；完整规范见 [日志指南](docs/logging.md) |
@@ -44,6 +46,7 @@ Windows x64 桌面软件样例，不是某个具体业务软件。
 - 退出顺序要保留优雅关闭与超时清理；实际运动设备还要有独立硬件安全措施。
 - 开发 `backend/.venv` 不参与打包；发行版用 uv 的 Python 缓存复制新目录，不能每次重新下载已安装的相同解释器。
 - **日志规范**：Renderer 使用 `createLogger(模块名)`，Main 使用 `console.info/warn/error`，Python 使用 Loguru；只记录必要状态、错误和关联 ID，不记录密钥、用户输入或文件原始路径。详见 [日志规范](docs/logging.md)。
+- **uv 引导安全**：仅在开发机调用 `uv self version`，缺失时从 Astral 官方发布地址获取固定版本归档和 SHA-256 并校验；二进制只留在被忽略的 `.tools/uv/`，不得打入发行包或执行未经校验的下载脚本。
 - **依赖策略**：仓库不提交 `pnpm-lock.yaml` 或 `backend/uv.lock`。pnpm 禁用锁文件；uv 可在本地生成被 Git 忽略的临时锁。依赖升级要执行 Windows 打包与测试，详见 [依赖管理](docs/dependencies.md)。
 - 保持可维护：优先短函数、清晰名称、小范围修改、真实示例，不新增无需求的框架。
 

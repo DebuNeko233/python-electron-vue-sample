@@ -19,7 +19,7 @@
 
 ## 1. 开发机首次运行
 
-当前重点平台：Windows x64。安装 **Node.js 22+、pnpm、uv**（只在开发机需要）。
+当前重点平台：Windows x64。安装 **Node.js 22+、pnpm** 即可，**uv 无需手工安装**：首次需要 Python 时自动执行 `uv self version` 检测系统 uv；系统没有 uv 才下载官方二进制到项目 `.tools/uv/`。首次下载需联网，且会校验官方 SHA-256。
 在 PowerShell 的项目根目录执行：
 
 ~~~powershell
@@ -28,7 +28,7 @@ pnpm dev
 ~~~
 
 - Windows 下 `pnpm dev` 打开两个独立终端，分别运行 Python、Electron/Vue。
-- Python 环境缺失时，uv 自动创建 `backend/.venv` 并安装依赖。
+- Python 环境缺失时，uv 自动创建 `backend/.venv` 并安装依赖；没有 uv 时先执行项目本地引导。
 - 正常运行时页面显示 `Python ready`，侧边栏可以切换“应用概览、HTTP 示例、实时任务、IPC 示例”。
 - 如果 Electron 先起来而 Python 尚未就绪，等待后点击界面里的“重新连接”。
 
@@ -85,7 +85,7 @@ pnpm build
 必须复制整个文件夹，不能只复制 `SampleApp.exe`。
 
 打包过程复制 uv 缓存中已经安装的 Python 解释器，缺少对应版本时才下载；
-构建使用独立运行时，不依赖最终用户安装 Python、Node.js 或 uv。
+构建使用独立运行时，不依赖最终用户安装 Python、Node.js 或 uv。下载 uv 只发生在开发/构建机，**不会进入绿色软件**。
 
 可在 [GitHub Actions](../.github/workflows/quality.yml) 查看自动化验证：
 Python 测试、TypeScript、构建、打包的 Python 通信测试、打包的 Electron
@@ -120,5 +120,5 @@ pnpm python:use 3.12
 - 会运行 Python 测试和 TypeScript 检查，也会查看日志排错。
 - 不依赖前述聊天记录，能独立添加、测试、打包一个小功能。
 
-继续阅读：[依赖管理](dependencies.md) · [目录约定](project-structure.md) · [通信协议](communication.md) ·
+继续阅读：[uv 自动引导](uv-bootstrap.md) · [依赖管理](dependencies.md) · [目录约定](project-structure.md) · [通信协议](communication.md) ·
 [业务扩展实战](extend-features.md) · [常见问题](troubleshooting.md)。

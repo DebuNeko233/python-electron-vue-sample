@@ -109,3 +109,7 @@ node scripts/smoke-parent-exit.mjs
 
 本模板没有自动更新、数据库、持久任务队列、完整业务登录系统、自动 SDK/DLL 打包、
 跨平台发布保证或面向设备的安全停机机制。这些都应在具体业务需求出现后单独设计。
+
+## 没有安装 uv / 自动引导下载失败
+
+`pnpm dev`、`pnpm test:backend`、`pnpm python:use`、`pnpm build` 会检测系统 uv，必要时自动下载官方 SHA-256 校验的项目本地 uv。开发机首次需能访问 GitHub Releases；如公司代理或防火墙无法访问，会报明确错误。可手工安装 uv 后重试，或在能够联网的开发机准备好对应 `.tools/uv/`。详见 [uv 自动引导](uv-bootstrap.md)。
