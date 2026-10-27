@@ -4,6 +4,11 @@
 
 ## [Unreleased]
 
+### 仓库名称更新
+
+- GitHub 仓库更名为 `DebuNeko233/python-electron-vue-template`；同步修改 README 克隆命令、历史标签链接和 npm 包元数据。
+- 示例应用 `SampleApp`、Python 包 `sample_backend`、应用 ID 和现有用户数据路径保持不变，以免仓库更名影响运行行为；已经发布的 `1.1` 标签不变。
+
 ### 源码可读性
 
 - 为 Electron Main/Preload、Vue 异步事件与状态、FastAPI 生命周期及鉴权、Python 子进程监测、uv/Electron 自动安装、Windows 打包和进程冒烟测试补充中文注释，着重解释权限边界、资源所有权和异常分支。
@@ -96,4 +101,4 @@
 - 未内置自动更新、业务数据库、持久化任务队列或 GPU/硬件 SDK 通用封装。
 - 原生 DLL、模型、驱动及设备安全停机需在具体业务和目标电脑上单独验证。
 
-[1.0.0]: https://github.com/DebuNeko233/python-electron-vue-sample/tree/1.0.0
+[1.0.0]: https://github.com/DebuNeko233/python-electron-vue-template/tree/1.0.0

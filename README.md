@@ -2,6 +2,8 @@
 
 基于 **Electron + Vue 3 + TypeScript + Python FastAPI + uv** 的轻量级 Windows 桌面应用模板。前后端分离开发，内置可运行的 IPC、HTTP、WebSocket 示例，支持独立 Python 运行时的绿色软件打包。
 
+**仓库名** `python-electron-vue-template` 只表示这是可复用的模板；示例应用仍叫 `SampleApp`，后端 Python 包仍叫 `sample_backend`，避免无意义的运行时破坏性重命名。
+
 ## 核心能力
 
 - **Electron 自动安装**：首次启动或打包前检查 Electron 可执行文件，缺失时使用官方安装脚本按需下载，不用手动处理 `Electron uninstall`。
@@ -17,8 +19,8 @@
 开发环境：**Windows x64、Node.js 22+、pnpm**。**无需预装 uv**：首次使用 Python 功能时会自动检查或下载 uv 到项目本地 `.tools/uv/`（需要联网）。
 
 ```powershell
-git clone https://github.com/DebuNeko233/python-electron-vue-sample.git
-cd python-electron-vue-sample
+git clone https://github.com/DebuNeko233/python-electron-vue-template.git
+cd python-electron-vue-template
 pnpm install
 pnpm dev
 ```
