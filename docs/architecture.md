@@ -26,3 +26,7 @@ Electron 日志位于 `data/logs/electron.log`。开发环境下 Python 日志�
 Demo tasks support start, status, and cancellation. A reconnecting renderer retrieves the authoritative task state through HTTP instead of guessing from missed WebSocket events.
 
 Windows CI exercises both graceful shutdown and forced Electron termination. The latter verifies the Python watchdog, not a forced child-process kill. Applications controlling physical hardware still require their own safety shutdown procedures.
+
+## 标准项目目录
+
+Vue 界面按 `views/components/composables/services` 整理；Python 按 `api/services/core` 整理。启动入口与 Electron 进程管理仍独立。目录与扩展示例见 [project-structure.md](project-structure.md)。

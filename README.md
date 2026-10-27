@@ -44,11 +44,22 @@ pnpm build
 打包脚本不会复制开发 `.venv`，而是用 uv 准备全新的独立 CPython、安装依赖、
 打包前端并运行基础导入测试。正式发布前仍需在无 Python/Node 的 Windows 电脑上验证。
 
+## 标准目录和业务示例
+
+前端使用 `views / components / composables / services / styles`，后端使用 `api / services / core`。
+这里面的文件是已经接通 HTTP、WebSocket 与 IPC 的可运行示例，不是空目录。
+
+详见 [标准目录结构与扩展教程](docs/project-structure.md)。
+
 ## 从哪里开始开发
 
-- `src/renderer/src/App.vue` — Vue 示例界面
-- `backend/src/sample_backend/api.py` — HTTP 与 WebSocket API
-- `backend/src/sample_backend/jobs.py` — Python 后台任务
+- `src/renderer/src/App.vue` — 顶层 Vue 页面容器
+- `src/renderer/src/views/HomeView.vue` — 首页组装
+- `src/renderer/src/components/` — HTTP、任务、IPC、实时事件组件
+- `src/renderer/src/services/backend-api.ts` — 类型化的 HTTP 调用
+- `backend/src/sample_backend/main.py` — FastAPI 应用装配
+- `backend/src/sample_backend/api/routes.py` — HTTP API
+- `backend/src/sample_backend/services/demo_jobs.py` — 后台任务
 - `src/main/backend-manager.ts` — Python 启动、关闭及异常处理
 - `src/main/index.ts` — Electron 窗口及 IPC
 - `src/preload/index.ts` — 向 Vue 暴露受限桌面操作
