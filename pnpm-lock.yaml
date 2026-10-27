@@ -9,38 +9,38 @@ importers:
   .:
     dependencies:
       vue:
-        specifier: ^3.5.0
+        specifier: ^3.5.44
         version: 3.5.44(typescript@5.9.3)
       ws:
-        specifier: ^8.18.0
+        specifier: ^8.22.0
         version: 8.22.0
     devDependencies:
       '@types/node':
-        specifier: ^22.0.0
+        specifier: ^22.20.5
         version: 22.20.5
       '@types/ws':
-        specifier: ^8.18.0
+        specifier: ^8.18.2
         version: 8.18.2
       '@vitejs/plugin-vue':
-        specifier: ^6.0.0
+        specifier: ^6.0.10
         version: 6.0.10(vite@7.3.7(@types/node@22.20.5)(jiti@2.7.0))(vue@3.5.44(typescript@5.9.3))
       electron:
-        specifier: ^38.0.0
+        specifier: ^38.8.6
         version: 38.8.6(supports-color@7.2.0)
       electron-builder:
-        specifier: ^26.0.0
+        specifier: ^26.18.0
         version: 26.18.0(electron-builder-squirrel-windows@26.18.0)(supports-color@7.2.0)
       electron-vite:
-        specifier: ^4.0.0
+        specifier: ^4.0.1
         version: 4.0.1(supports-color@7.2.0)(vite@7.3.7(@types/node@22.20.5)(jiti@2.7.0))
       typescript:
-        specifier: ^5.9.0
+        specifier: ^5.9.3
         version: 5.9.3
       vite:
-        specifier: ^7.0.0
+        specifier: ^7.3.7
         version: 7.3.7(@types/node@22.20.5)(jiti@2.7.0)
       vue-tsc:
-        specifier: ^3.0.0
+        specifier: ^3.3.13
         version: 3.3.13(typescript@5.9.3)
 
 packages:
@@ -513,8 +513,8 @@ packages:
     resolution: {integrity: sha512-jCs9ldd7NwzpgXDIf6P3+NrHh9/sD6CQdxHyjQI+h/6rDNo88ypBxxz45UDuZHz9r3tNz7N/VInSVoVdtXEI4A==}
     engines: {node: ^14.21.3 || >=16}
 
-  '@peculiar/asn1-schema@2.11.0':
-    resolution: {integrity: sha512-8xh4avo53/vXO6UEv9yaoJ83hY581geaLTygf61NPIXP5AeIZCPjJhpTaYU23IZkG+NpLN/C9FYzWp7hphIT9A==}
+  '@peculiar/asn1-schema@2.11.1':
+    resolution: {integrity: sha512-jaU9OaCcbZUdyXx9hMETZB9xoNmxTGjOGFqd3cOwKFkpKnyKd9WxF3uqj4PvX4cyOMP9bSdHg5YyML2qtx/d/g==}
     engines: {node: '>=14'}
 
   '@peculiar/json-schema@1.1.12':
@@ -828,8 +828,8 @@ packages:
   base64-js@1.5.1:
     resolution: {integrity: sha512-AKpaYlHn8t4SVbOHCy+b5+KKgvR4vrsD8vbvrbiQJps7fKDTkjkDry6ji0rUJjC0kzbNePLwzxq8iypo41qeWA==}
 
-  baseline-browser-mapping@2.11.32:
-    resolution: {integrity: sha512-UvuxFU9P3hM29LrQdwu0cD6w6/+SFr+UlB9s/knI7+O2rK9xFxKUwSDWxGdbbqQ9/V7BJ5s0NI5nQAE4uJp3gQ==}
+  baseline-browser-mapping@2.11.33:
+    resolution: {integrity: sha512-yiVKDX+qCMRKBE084lXvq9EcwFUhKZ2nU8TK1EQQuOgPNR/lmbGxXOeDdlGUqC2Zz11Cs9rk1d/8NfgBmlkt0w==}
     engines: {node: '>=6.0.0'}
     hasBin: true
 
@@ -2268,7 +2268,7 @@ snapshots:
 
   '@noble/hashes@1.8.0': {}
 
-  '@peculiar/asn1-schema@2.11.0':
+  '@peculiar/asn1-schema@2.11.1':
     dependencies:
       '@peculiar/utils': 2.0.3
       asn1js: 3.1.0
@@ -2284,7 +2284,7 @@ snapshots:
 
   '@peculiar/webcrypto@1.7.1':
     dependencies:
-      '@peculiar/asn1-schema': 2.11.0
+      '@peculiar/asn1-schema': 2.11.1
       '@peculiar/json-schema': 1.1.12
       '@peculiar/utils': 2.0.3
       tslib: 2.8.1
@@ -2592,7 +2592,7 @@ snapshots:
 
   base64-js@1.5.1: {}
 
-  baseline-browser-mapping@2.11.32: {}
+  baseline-browser-mapping@2.11.33: {}
 
   bluebird@3.7.2: {}
 
@@ -2614,7 +2614,7 @@ snapshots:
 
   browserslist@4.29.4:
     dependencies:
-      baseline-browser-mapping: 2.11.32
+      baseline-browser-mapping: 2.11.33
       caniuse-lite: 1.0.30001819
       electron-to-chromium: 1.5.464
       node-releases: 2.0.60
@@ -3655,7 +3655,7 @@ snapshots:
 
   webcrypto-core@1.9.2:
     dependencies:
-      '@peculiar/asn1-schema': 2.11.0
+      '@peculiar/asn1-schema': 2.11.1
       '@peculiar/json-schema': 1.1.12
       '@peculiar/utils': 2.0.3
       asn1js: 3.1.0
