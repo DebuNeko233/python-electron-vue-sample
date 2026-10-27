@@ -1,0 +1,73 @@
+name: Refresh compatible dependency locks (one-time)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/_refresh_compatible_dependencies_once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  refresh-and-validate:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: '0.13.5'
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      - name: Refresh latest compatible versions within validated major ranges
+        shell: bash
+        run: |
+          set -euo pipefail
+          pnpm update
+          uv lock --project backend --upgrade
+          git diff --stat -- package.json pnpm-lock.yaml backend/pyproject.toml backend/uv.lock
+      - name: Test Python 3.10 with deprecation warnings treated as errors
+        shell: bash
+        run: |
+          set -euo pipefail
+          uv python install 3.10
+          uv run --project backend --python 3.10 --group dev pytest -q -W 'error::starlette.exceptions.StarletteDeprecationWarning'
+      - name: Test Python 3.12 with deprecation warnings treated as errors
+        shell: bash
+        run: |
+          set -euo pipefail
+          uv python install 3.12
+          uv run --project backend --python 3.12 --group dev pytest -q -W 'error::starlette.exceptions.StarletteDeprecationWarning'
+      - name: Typecheck and build frontend
+        shell: bash
+        run: |
+          set -euo pipefail
+          pnpm typecheck
+          pnpm exec electron-vite build
+          node --test scripts/docs.test.mjs
+          node --test scripts/windows-terminal.test.mjs
+          node --test scripts/process-command.test.mjs
+      - name: Build bundled Python and Electron and smoke-test them
+        shell: bash
+        run: |
+          set -euo pipefail
+          pnpm build
+          node scripts/smoke-backend.mjs
+          node scripts/smoke-electron.mjs
+          node scripts/smoke-parent-exit.mjs
+      - name: Save refreshed lock files only after all Windows checks pass
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add pnpm-lock.yaml package.json backend/uv.lock backend/pyproject.toml
+          if git diff --cached --quiet; then
+            echo 'Already at latest compatible locked dependency versions'
+            exit 0
+          fi
+          git commit -m 'chore(deps): refresh compatible pinned npm and Python dependencies'
+          git push origin HEAD:main
