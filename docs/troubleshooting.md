@@ -14,6 +14,19 @@
 | 开发正常，绿色版错误 | `scripts/build.mjs`、`resources/backend/manifest.json` |
 | 退出后还有 Python 进程 | `backend-manager.ts` 和 Python `__main__.py` |
 
+## Electron uninstall / electron-vite 能编译却打不开窗口
+
+Electron 42+ 不再在 `pnpm install` 的 `postinstall` 中自动下载二进制，`electron-vite dev` 却需要先找到 `electron/path.txt`。模板已通过 `scripts/ensure-electron.mjs` 在 `pnpm dev:frontend`、`pnpm build` 中自动补齐缺失的 Electron 运行文件。
+
+如安装期间 GitHub Releases 网络不可达，可先手工执行：
+
+~~~powershell
+pnpm electron:setup
+pnpm dev:frontend
+~~~
+
+此步骤只下载项目已经声明的 Electron 版本；不改变 `package.json`、Node.js、Python 或 uv。不要直接删除整个 `node_modules` 来处理这个问题。下载失败时检查网络/代理，或按 Electron 官方文档配置下载镜像。
+
 ## 开发启动失败
 
 尝试在不同 PowerShell 终端分别执行：

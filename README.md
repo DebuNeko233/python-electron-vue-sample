@@ -4,6 +4,7 @@
 
 ## 核心能力
 
+- **Electron 自动安装**：首次启动或打包前检查 Electron 可执行文件，缺失时使用官方安装脚本按需下载，不用手动处理 `Electron uninstall`。
 - **一键开发**：`pnpm dev` 在 Windows 下分别打开 Python 和 Electron/Vue 开发终端，支持独立调试与热更新。
 - **三种通信**：Electron IPC（桌面系统操作）、HTTP（业务请求）、WebSocket（实时事件和任务进度）。
 - **Python 环境管理**：自动检测 `uv self version`；没有 uv 时下载校验后的项目本地 uv，管理解释器和依赖。
@@ -34,6 +35,7 @@ pnpm dev
 | `pnpm python:use 3.11` | 切换 Python 版本并重建 `.venv`（先关闭正在运行的 Python） |
 | `pnpm test:backend` | 运行 Python 测试 |
 | `pnpm typecheck` | 检查 TypeScript/Vue |
+| `pnpm electron:setup` | 检查并按需安装 Electron 运行文件 |
 | `pnpm build` | 构建 Windows x64 绿色应用目录 |
 
 ## 构建与运行

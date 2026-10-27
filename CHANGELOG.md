@@ -4,6 +4,11 @@
 
 ## [Unreleased]
 
+### Electron 开发启动修复
+
+- 适配 Electron 42+ 的延迟下载机制：`pnpm dev:frontend` 和 `pnpm build` 启动前检查已安装的 Electron 版本、`path.txt` 和二进制路径，缺失时调用当前 Electron npm 包自带的官方 `install.js`，避免 `electron-vite` 抛出 `Error: Electron uninstall`。
+- 提供 `pnpm electron:setup` 自检/手动修复入口和缺失文件的回归测试；下载结果会复用，不引入新的包或系统安装。
+
 ### 开发环境改进
 
 - 开发电脑无需预装 uv：先运行 `uv self version` 检测系统命令；没有 uv 时自动从官方 GitHub Releases 下载受 SHA-256 校验的 uv 到项目内 `.tools/uv/`，重复运行复用本地文件。

@@ -23,6 +23,7 @@ jobs:
       - run: pnpm install --no-lockfile
       - run: uv sync --project backend --group dev
       - run: uv run --project backend pytest -q
+      - run: node --test scripts/ensure-electron.test.mjs
       - run: node --test scripts/uv-bootstrap.test.mjs
       - run: node --test scripts/process-command.test.mjs
       - run: node --test scripts/docs.test.mjs
@@ -33,6 +34,8 @@ jobs:
           UV_BOOTSTRAP_ONLINE: '1'
       - run: pnpm typecheck
       - run: pnpm exec electron-vite build
+      - name: Ensure dev Electron binary is installed before packaging
+        run: pnpm electron:setup
       - run: pnpm build
       - name: Verify the selected Python is cached without downloads
         shell: pwsh
@@ -81,6 +84,7 @@ jobs:
       - run: pnpm install --no-lockfile
       - run: uv sync --project backend --group dev
       - run: uv run --project backend pytest -q
+      - run: node --test scripts/ensure-electron.test.mjs
       - run: node --test scripts/uv-bootstrap.test.mjs
       - run: node --test scripts/process-command.test.mjs
       - run: node --test scripts/docs.test.mjs

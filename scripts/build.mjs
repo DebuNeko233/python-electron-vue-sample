@@ -11,6 +11,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { resolveProcessCommand } from './process-command.mjs'
 import { ensureUv } from './uv-bootstrap.mjs'
+import { ensureElectron } from './ensure-electron.mjs'
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const backend = path.join(root, 'backend')
@@ -93,6 +94,8 @@ fs.mkdirSync(staging, { recursive: true })
 const env = { ...process.env, UV_LINK_MODE: 'copy' }
 
 try {
+  // Electron 42+ no longer downloads itself at pnpm install time.
+  ensureElectron()
   uv = await ensureUv()
   // Resolve using pyproject.toml; uv may create an ignored, local uv.lock.
   // Keep the project .venv separate from the self-contained release runtime.
