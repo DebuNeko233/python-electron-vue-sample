@@ -1,6 +1,6 @@
 /**
- * Exercise the exact Python interpreter shipped inside the Windows release.
- * No system Python is used, and no Electron window is needed for this check.
+ * 独立验证发行包中携带的 CPython，不借用开发机 .venv 或系统 Python。
+ * 检查鉴权、HTTP、WebSocket、停机响应和日志是否正常。
  */
 
 import { spawn } from 'node:child_process'
@@ -21,6 +21,7 @@ const token = randomBytes(32).toString('hex')
 const controlToken = randomBytes(32).toString('hex')
 const sessionId = randomUUID()
 
+// 尽量模拟 Electron 的托管启动环境，测试的是真实发行版运行契约。
 const child = spawn(executable, ['-I', '-m', 'sample_backend'], {
   cwd: path.dirname(executable),
   windowsHide: true,
@@ -76,6 +77,7 @@ async function test() {
   if (!health.ok || (await health.json()).status !== 'ready') {
     throw new Error('Packaged Python health check failed')
   }
+  // 发行版业务接口必须拒绝不带会话令牌的请求。
   const unauthorized = await fetch(base + '/api/health')
   if (unauthorized.status !== 401) throw new Error('Missing session authentication')
 
@@ -89,6 +91,7 @@ async function test() {
   }
   await checkWebSocket(base.replace('http:', 'ws:') + '/ws/events')
 
+  // 与业务会话令牌不同，停机接口必须使用专用控制令牌。
   const shutdown = await fetch(base + '/internal/shutdown', {
     method: 'POST',
     headers: { 'x-control-token': controlToken },
@@ -106,6 +109,7 @@ async function test() {
 try {
   await test()
 } finally {
+  // 即使验证失败也必须清理启动的 Python，避免 CI 残留后台进程。
   if (child.exitCode === null) {
     if (process.platform === 'win32' && child.pid) {
       killWindowsPid(child.pid, { tree: true })

@@ -44,6 +44,7 @@ test('installed system uv is used without touching local cache', async () => {
   }
 })
 
+// 用伪造的离线下载与 tar 解压器测试缓存逻辑，普通单元测试不依赖网络。
 test('missing uv installs locally once and reuses cache without downloads', async () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'sample-uv-test-'))
   const archive = Buffer.from('fake downloaded archive')
@@ -94,8 +95,7 @@ test('failed checksum does not install an executable', async () => {
   }
 })
 
-// CI explicitly exercises the real download, archive extraction, and execution
-// on Windows without relying on its preinstalled system-wide uv.
+// Windows CI 单独开启此联网用例，强制模拟系统不存在 uv，并验证真实官方安装包。
 test('Windows can bootstrap verified official uv with no system uv', {
   skip: process.platform !== 'win32' || process.env.UV_BOOTSTRAP_ONLINE !== '1',
   timeout: 120_000,

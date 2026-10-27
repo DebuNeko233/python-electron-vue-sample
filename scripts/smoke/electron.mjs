@@ -1,7 +1,6 @@
 /**
- * Integration check for the real, unpacked Windows Electron executable.
- * This is intentionally separate from smoke/backend.mjs: it tests Electron's
- * packaged entrypoint and ownership of its own Python child process.
+ * 启动真实的 win-unpacked/SampleApp.exe，覆盖 Electron 启动及其管理的 Python。
+ * 不与独立 Python 冒烟测试合并，因为这里重点验证进程所有权。
  */
 
 import assert from 'node:assert/strict'
@@ -52,6 +51,7 @@ try {
   assert.equal(report.exitCode, 0, 'Electron reported a failed backend lifecycle')
   assert.ok(Number.isInteger(report.pythonPid) && report.pythonPid > 0)
 
+  // Electron 正常退出后，它自己创建的 Python 必须被正确清理。
   assert.equal(isWindowsPidAlive(report.pythonPid), false, 'A managed Python process was left running')
   console.log('Packaged Electron smoke passed: launched Python, HTTP API, clean process exit')
 } finally {

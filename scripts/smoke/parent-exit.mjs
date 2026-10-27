@@ -1,6 +1,6 @@
 /**
- * Verify recovery when Electron is killed without running before-quit.
- * taskkill does NOT use /T here: Python must exit via its own parent watchdog.
+ * 只强制终止 Electron 而不递归终止子进程，验证 Python 看门狗能自行退出。
+ * 如果使用 taskkill /T，Python 被外部杀死会掩盖看门狗逻辑失败。
  */
 import assert from 'node:assert/strict'
 import { spawn } from 'node:child_process'
@@ -32,6 +32,7 @@ try {
   assert.ok(Number.isInteger(pythonPid) && pythonPid > 0)
   assert.ok(isWindowsPidAlive(pythonPid), 'Python was not running before Electron was killed')
 
+  // 故意不传 tree=true，保证测试实际观察的是 Python 自己的退出机制。
   assert.equal(killWindowsPid(electron.pid).status, 0, 'Cannot force-kill Electron')
   const deadline = Date.now() + 20_000
   while (isWindowsPidAlive(pythonPid) && Date.now() < deadline) {

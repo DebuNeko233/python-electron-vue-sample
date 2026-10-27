@@ -1,6 +1,6 @@
 /**
- * Keep handoff documentation usable after files are moved or renamed.
- * Runs with Node.js only; no Markdown dependency or network is required.
+ * 检查仓库 Markdown 本地相对链接，避免代码迁移后文档引用失效。
+ * 只依赖 Node.js；跳过代码围栏中的伪 Markdown，防止误报。
  */
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
