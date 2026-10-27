@@ -3,6 +3,21 @@
 基于 **Vue 3 + TypeScript + Electron + Python FastAPI + uv** 的简洁可维护脚手架。
 包含三个真实通信示例：Electron IPC、HTTP 请求、WebSocket 实时任务进度。
 
+## 先读这里：人类与 AI 的学习路径
+
+| 想做什么 | 该读什么 |
+| --- | --- |
+| 第一次运行，理解按钮功能 | [10 分钟上手教程](docs/getting-started.md) |
+| 理解 Electron/Preload/Python 请求如何往返 | [通信与认证契约](docs/communication.md) |
+| 知道代码该放到哪个文件夹 | [标准目录](docs/project-structure.md) |
+| 独立新增一个完整 Python + Vue 功能 | [从零扩展实战](docs/extend-features.md) |
+| 改应用名称、依赖、资源 | [定制与限制](docs/customization.md) |
+| 运行中出现报错 | [分层排错](docs/troubleshooting.md) |
+| 交给 AI/Codex 修改 | [AGENTS.md](AGENTS.md) |
+
+建议按 **上手 → 通信 → 业务练习 → 测试与构建** 的顺序阅读。
+这些是当前代码的真实使用说明，不需要阅读以前的 ChatGPT 对话。
+
 ## 开发环境
 
 Windows x64、Node.js 22+、pnpm（也可用 npm）以及 [uv](https://docs.astral.sh/uv/getting-started/installation/)。

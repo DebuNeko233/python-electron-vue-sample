@@ -121,3 +121,11 @@ await request.app.state.events.publish(
 **页面负责组装、组件负责交互、组合式函数负责订阅、服务负责 API。**
 Python 路由应短小，复杂业务放在 `services/`。
 不为了目录好看而增加无用的空文件、自动注册框架或过早抽象。
+
+## 下一步学习
+
+- [上手和启动](getting-started.md)
+- [真实通信流程](communication.md)
+- [完整业务扩展](extend-features.md)
+- [打包和依赖定制](customization.md)
+- [排错手册](troubleshooting.md)
