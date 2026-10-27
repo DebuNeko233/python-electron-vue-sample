@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
 import test from 'node:test'
-import { resolveProcessCommand } from './process-command.mjs'
+import { resolveProcessCommand } from '../lib/process-command.mjs'
 
 test('native commands keep their own argument array on Windows', () => {
   const result = resolveProcessCommand('uv', ['python', 'find', '3.12'], 'win32')

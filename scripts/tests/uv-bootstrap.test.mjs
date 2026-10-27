@@ -5,7 +5,7 @@ import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import test from 'node:test'
-import { ensureUv, uvAsset, uvPath, verifyUvArchive, BOOTSTRAP_UV_VERSION, checkUv } from './uv-bootstrap.mjs'
+import { ensureUv, uvAsset, uvPath, verifyUvArchive, BOOTSTRAP_UV_VERSION, checkUv } from '../uv-bootstrap.mjs'
 
 test('uv assets are mapped to official supported architectures', () => {
   assert.equal(uvAsset('win32', 'x64'), 'uv-x86_64-pc-windows-msvc.zip')

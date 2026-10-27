@@ -46,7 +46,7 @@ Python 解释器仍由 uv 管理并复用，发行构建只会把独立 Python �
 ## 验证
 
 ~~~powershell
-node --test scripts/uv-bootstrap.test.mjs
+pnpm test:scripts
 pnpm test:backend
 pnpm build
 ~~~

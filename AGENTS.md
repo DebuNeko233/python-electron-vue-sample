@@ -29,7 +29,7 @@ Windows x64 桌面软件样例，不是某个具体业务软件。
 | Python 算法、后台任务 | `backend/src/sample_backend/services/`，并在 `api/` 暴露接口 |
 | WebSocket 事件 | `services/event_hub.py`、Python 业务 Service、前端 `composables/` |
 | 新桌面权限 | `src/main/index.ts`、`src/preload/index.ts`、`src/shared/bridge.ts`、`services/desktop.ts` |
-| uv 自动引导 / 校验 | `scripts/uv-bootstrap.mjs`、`scripts/uv-bootstrap.test.mjs`；见 [引导指南](docs/uv-bootstrap.md) |
+| uv 自动引导 / 校验 | `scripts/uv-bootstrap.mjs`、`scripts/tests/uv-bootstrap.test.mjs`；见 [引导指南](docs/uv-bootstrap.md) |
 | 改 Python 版本或依赖 | `backend/.python-version`、`backend/pyproject.toml`（本地 `backend/uv.lock` 不提交） |
 | 打包路径、便携目录 | `scripts/build.mjs`、`electron-builder.yml`、`src/main/backend-manager.ts` |
 | 前端/后端日志 | `src/renderer/src/services/logger.ts`、`src/main/logging.ts`、`backend/src/sample_backend/core/logging.py`；完整规范见 [日志指南](docs/logging.md) |
@@ -59,7 +59,7 @@ pnpm dev:backend
 pnpm dev:frontend
 pnpm test:backend
 pnpm typecheck
-node --test scripts/windows-terminal.test.mjs
+pnpm test:scripts
 pnpm python:info
 pnpm python:use 3.11
 pnpm build

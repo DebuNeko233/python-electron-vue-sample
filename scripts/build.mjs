@@ -9,7 +9,7 @@ import { spawnSync } from 'node:child_process'
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { resolveProcessCommand } from './process-command.mjs'
+import { resolveProcessCommand } from './lib/process-command.mjs'
 import { ensureUv } from './uv-bootstrap.mjs'
 import { ensureElectron } from './ensure-electron.mjs'
 

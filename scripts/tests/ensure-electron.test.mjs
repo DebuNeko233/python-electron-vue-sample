@@ -3,7 +3,7 @@ import { test } from 'node:test'
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
-import { electronIsReady, ensureElectron } from './ensure-electron.mjs'
+import { electronIsReady, ensureElectron } from '../ensure-electron.mjs'
 
 function fakeElectron(root, { version = '45.0.0', installed = false } = {}) {
   const directory = path.join(root, 'electron')

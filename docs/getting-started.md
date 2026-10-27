@@ -72,7 +72,7 @@ pnpm dev:frontend
 ~~~powershell
 pnpm test:backend
 pnpm typecheck
-node --test scripts/windows-terminal.test.mjs
+pnpm test:scripts
 ~~~
 
 需要打包绿色目录时，在 **Windows x64** 执行：

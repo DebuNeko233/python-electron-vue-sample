@@ -23,13 +23,9 @@ jobs:
       - run: pnpm install --no-lockfile
       - run: uv sync --project backend --group dev
       - run: uv run --project backend pytest -q
-      - run: node --test scripts/ensure-electron.test.mjs
-      - run: node --test scripts/uv-bootstrap.test.mjs
-      - run: node --test scripts/process-command.test.mjs
-      - run: node --test scripts/docs.test.mjs
-      - run: node --test scripts/windows-terminal.test.mjs
+      - run: pnpm test:scripts
       - name: Verify automatic uv download with no global uv
-        run: node --test scripts/uv-bootstrap.test.mjs
+        run: node --test scripts/tests/uv-bootstrap.test.mjs
         env:
           UV_BOOTSTRAP_ONLINE: '1'
       - run: pnpm typecheck
@@ -84,10 +80,6 @@ jobs:
       - run: pnpm install --no-lockfile
       - run: uv sync --project backend --group dev
       - run: uv run --project backend pytest -q
-      - run: node --test scripts/ensure-electron.test.mjs
-      - run: node --test scripts/uv-bootstrap.test.mjs
-      - run: node --test scripts/process-command.test.mjs
-      - run: node --test scripts/docs.test.mjs
-      - run: node --test scripts/windows-terminal.test.mjs
+      - run: pnpm test:scripts
       - run: pnpm typecheck
       - run: pnpm exec electron-vite build

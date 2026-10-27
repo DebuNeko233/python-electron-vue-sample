@@ -39,7 +39,7 @@ pnpm dev:frontend
 若单独启动正常，一键启动有问题，执行：
 
 ~~~powershell
-node --test scripts/windows-terminal.test.mjs
+pnpm test:scripts
 ~~~
 
 ## Python offline

@@ -5,7 +5,7 @@ import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import { setTimeout as pause } from 'node:timers/promises'
-import { windowsTerminalScript } from './windows-terminal.mjs'
+import { windowsTerminalScript } from '../windows-terminal.mjs'
 
 test('starts cmd.exe directly instead of interpreting the window title as a file', () => {
   const script = windowsTerminalScript({
