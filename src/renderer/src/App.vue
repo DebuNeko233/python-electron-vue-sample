@@ -9,17 +9,59 @@ const progress = ref(0)
 const taskId = ref('')
 const selectedFile = ref('')
 const error = ref('')
+const diagnostic = ref('')
+const retrying = ref(false)
+const taskStatus = ref('尚未开始')
 const events = ref<string[]>([])
 
 let unsubscribeEvent: (() => void) | undefined
 let unsubscribeStatus: (() => void) | undefined
 
+async function refreshTask(): Promise<void> {
+  if (!taskId.value) return
+  try {
+    const job = await window.desktop.backend.request<{ status: string; progress: number }>(
+      'GET', '/api/tasks/' + taskId.value,
+    )
+    taskStatus.value = job.status
+    progress.value = job.progress
+  } catch {
+    // The task may belong to an older Python instance after a reconnect.
+    taskStatus.value = '未找到任务（后端可能已经重启）'
+  }
+}
+
+async function refreshDiagnostics(): Promise<void> {
+  try { diagnostic.value = await window.desktop.backend.diagnostics() }
+  catch { diagnostic.value = '无法读取 Python 诊断信息' }
+}
+
+async function retryBackend(): Promise<void> {
+  if (retrying.value) return
+  retrying.value = true
+  error.value = ''
+  try {
+    await window.desktop.backend.retry()
+    await refreshTask()
+  } catch (caught) {
+    error.value = String(caught)
+  } finally {
+    retrying.value = false
+    await refreshDiagnostics()
+  }
+}
+
 function addEvent(message: BackendEvent): void {
+  if (message.event === 'system.connected') void refreshTask()
   events.value.unshift(message.event + ' · ' + JSON.stringify(message.data))
   events.value = events.value.slice(0, 12)
+  if (message.data.task_id !== taskId.value) return
   if (message.event === 'task.progress') {
     progress.value = Number(message.data.progress ?? 0)
+    taskStatus.value = 'running'
   }
+  if (message.event === 'task.completed') taskStatus.value = 'completed'
+  if (message.event === 'task.cancelled') taskStatus.value = 'cancelled'
 }
 
 async function echo(): Promise<void> {
@@ -42,6 +84,20 @@ async function runDemo(): Promise<void> {
       'POST', '/api/tasks/demo',
     )
     taskId.value = response.task_id
+    taskStatus.value = 'running'
+    await refreshTask()
+  } catch (caught) {
+    error.value = String(caught)
+  }
+}
+
+async function cancelTask(): Promise<void> {
+  if (!taskId.value || taskStatus.value !== 'running') return
+  try {
+    const job = await window.desktop.backend.request<{ status: string }>(
+      'POST', '/api/tasks/' + taskId.value + '/cancel',
+    )
+    taskStatus.value = job.status
   } catch (caught) {
     error.value = String(caught)
   }
@@ -57,8 +113,12 @@ async function selectFile(): Promise<void> {
 
 onMounted(async () => {
   unsubscribeEvent = window.desktop.backend.onEvent(addEvent)
-  unsubscribeStatus = window.desktop.backend.onStatus((value) => { status.value = value })
+  unsubscribeStatus = window.desktop.backend.onStatus((value) => {
+    status.value = value
+    if (value === 'offline' || value === 'failed') void refreshDiagnostics()
+  })
   status.value = await window.desktop.backend.status()
+  if (status.value !== 'ready') await refreshDiagnostics()
 })
 
 onUnmounted(() => {
@@ -87,6 +147,16 @@ onUnmounted(() => {
         <div class="status" :class="status"><span class="indicator"></span> Python {{ status }}</div>
       </header>
 
+      <section v-if="status === 'offline' || status === 'failed'" class="connection-notice">
+        <div>
+          <strong>Python 后端{{ status === 'failed' ? '启动失败' : '暂未连接' }}</strong>
+          <p>{{ diagnostic || '检查 Python 终端中的报错，或打开日志目录查看详情。' }}</p>
+        </div>
+        <button class="secondary" :disabled="retrying" @click="retryBackend">
+          {{ retrying ? '连接中…' : '重新连接' }}
+        </button>
+      </section>
+
       <div class="cards">
         <section class="card metric">
           <div class="metric-label">Electron IPC</div>
@@ -111,12 +181,18 @@ onUnmounted(() => {
           <label for="echo">发送给 Python 的内容</label>
           <div class="input-row">
             <input id="echo" v-model="input" maxlength="500" @keyup.enter="echo" />
-            <button @click="echo">发送</button>
+            <button :disabled="status !== 'ready'" @click="echo">发送</button>
           </div>
           <div class="result">{{ echoResult }}</div>
           <div class="panel-heading task-heading"><h2>WebSocket 进度示例</h2><span>task.progress</span></div>
           <div class="progress-track"><div class="progress-fill" :style="{ width: progress + '%' }"></div></div>
-          <div class="progress-row"><span>任务进度 {{ progress }}%</span><button class="secondary" @click="runDemo">启动模拟任务</button></div>
+          <div class="progress-row">
+            <span>任务进度 {{ progress }}% · {{ taskStatus }}</span>
+            <div class="task-buttons">
+              <button class="secondary" :disabled="status !== 'ready'" @click="runDemo">启动模拟任务</button>
+              <button class="secondary" :disabled="status !== 'ready' || taskStatus !== 'running'" @click="cancelTask">取消任务</button>
+            </div>
+          </div>
           <p v-if="taskId" class="small">Task ID: {{ taskId }}</p>
         </section>
 

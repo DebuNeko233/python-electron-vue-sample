@@ -51,3 +51,9 @@ hr { border:0; height:1px; background:#edf1f5; margin:25px 0; }
 .error { border:1px solid #f2baba; background:#fff1f1; color:#a71e1e; border-radius:8px; padding:13px; font-size:12px; }
 footer { margin:23px 0 0; font-size:11px; color:#99a6b7; text-align:center; }
 @media (max-width:1050px) { .sidebar { width:178px; } .content { padding:27px 22px; } .panels { grid-template-columns:1fr; } }
+
+.connection-notice { display:flex; align-items:center; justify-content:space-between; gap:18px; padding:15px 20px; margin-bottom:20px; background:#fff8ed; border:1px solid #f3ddab; border-radius:12px; }
+.connection-notice strong { font-size:13px; color:#875e19; }
+.connection-notice p { font-size:12px; color:#987c4d; margin:5px 0 0; overflow-wrap:anywhere; }
+.task-buttons { display:flex; gap:8px; }
+button:disabled { cursor:not-allowed; opacity:.55; }

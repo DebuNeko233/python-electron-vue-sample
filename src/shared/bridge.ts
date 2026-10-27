@@ -14,6 +14,8 @@ export interface DesktopBridge {
     onEvent(listener: (event: BackendEvent) => void): () => void
     onStatus(listener: (status: BackendStatus) => void): () => void
     status(): Promise<BackendStatus>
+    diagnostics(): Promise<string>
+    retry(): Promise<void>
   }
   system: {
     selectFile(): Promise<string | null>

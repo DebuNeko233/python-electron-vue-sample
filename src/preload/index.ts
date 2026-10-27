@@ -16,6 +16,8 @@ const desktop: DesktopBridge = {
       return () => ipcRenderer.removeListener('backend:status', handler)
     },
     status: () => ipcRenderer.invoke('backend:status'),
+    diagnostics: () => ipcRenderer.invoke('backend:diagnostics'),
+    retry: () => ipcRenderer.invoke('backend:retry'),
   },
   system: {
     selectFile: () => ipcRenderer.invoke('system:select-file'),

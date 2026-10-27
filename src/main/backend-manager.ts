@@ -36,10 +36,12 @@ export class BackendManager {
   private readyFile = ''
   private stopping = false
   private currentStatus: BackendStatus = 'starting'
+  private latestError = ''
 
   constructor(private readonly notify: (status: BackendStatus) => void) {}
 
   get status(): BackendStatus { return this.currentStatus }
+  get diagnostic(): string { return this.latestError }
   get token(): string { return this.sessionToken }
   get ownedPid(): number | null { return this.child?.pid ?? null }
 
@@ -53,6 +55,7 @@ export class BackendManager {
   }
 
   private change(status: BackendStatus): void {
+    if (status === 'ready') this.latestError = ''
     this.currentStatus = status
     this.notify(status)
   }
@@ -76,13 +79,21 @@ export class BackendManager {
         await this.health()
         this.change('ready')
       } catch {
+        this.latestError = 'Python 开发服务尚未连接。请运行 pnpm dev:backend。'
         this.change('offline')
       }
       return
     }
     if (this.child || this.stopping) return
     this.change('starting')
-    const python = this.packagedPython()
+    let python: string
+    try {
+      python = this.packagedPython()
+    } catch (error) {
+      this.latestError = String(error)
+      this.change('failed')
+      throw error
+    }
     const sessionId = randomUUID()
     const startupDirectory = path.join(app.getPath('userData'), 'startup')
     fs.mkdirSync(startupDirectory, { recursive: true })
@@ -112,7 +123,10 @@ export class BackendManager {
       console.info('Python exited:', code)
       if (this.child === child) {
         this.child = null
-        if (!this.stopping) this.change('failed')
+        if (!this.stopping) {
+          this.latestError = 'Python 后端意外退出（exit code: ' + String(code) + '）'
+          this.change('failed')
+        }
       }
     })
 
@@ -137,8 +151,9 @@ export class BackendManager {
       throw new Error('Python startup timeout')
     } catch (error) {
       console.error('Python startup failed:', error)
-      this.change('failed')
+      this.latestError = String(error)
       await this.stop()
+      this.change('failed')
       throw error
     } finally {
       this.removeReadyFile()

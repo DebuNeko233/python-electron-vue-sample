@@ -37,6 +37,20 @@ const stream = new EventStream(backend, (event) => {
   }
 })
 
+let retryPromise: Promise<void> | null = null
+
+/** Manual retry also works when the developer started Python after Electron. */
+function retryBackend(): Promise<void> {
+  if (retryPromise) return retryPromise
+  retryPromise = (async () => {
+    stream.stop()
+    await backend.stop()
+    await backend.start()
+    stream.connect()
+  })().finally(() => { retryPromise = null })
+  return retryPromise
+}
+
 function checkSender(event: Electron.IpcMainInvokeEvent): void {
   if (!mainWindow || mainWindow.isDestroyed() ||
       event.sender !== mainWindow.webContents ||
@@ -49,6 +63,14 @@ function registerIpc(): void {
   ipcMain.handle('backend:status', (event) => {
     checkSender(event)
     return backend.status
+  })
+  ipcMain.handle('backend:diagnostics', (event) => {
+    checkSender(event)
+    return backend.diagnostic
+  })
+  ipcMain.handle('backend:retry', (event) => {
+    checkSender(event)
+    return retryBackend()
   })
   ipcMain.handle('backend:request', (event, method: unknown, apiPath: unknown, body?: unknown) => {
     checkSender(event)
