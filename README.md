@@ -30,10 +30,12 @@ pnpm dev
 | 命令 | 用途 |
 | --- | --- |
 | `pnpm dev` | 检测/引导 uv 后一键启动开发环境 |
+| `pnpm dev:combined` | 前后端在同一个终端运行，方便集中查看输出 |
 | `pnpm dev:frontend` | 仅启动 Electron/Vue |
 | `pnpm dev:backend` | 仅启动 Python/FastAPI |
 | `pnpm python:use 3.11` | 切换 Python 版本并重建 `.venv`（先关闭正在运行的 Python） |
 | `pnpm test:backend` | 运行 Python 测试 |
+| `pnpm test:scripts` | 运行辅助脚本的 Node.js 单元测试 |
 | `pnpm typecheck` | 检查 TypeScript/Vue |
 | `pnpm electron:setup` | 检查并按需安装 Electron 运行文件 |
 | `pnpm build` | 构建 Windows x64 绿色应用目录 |

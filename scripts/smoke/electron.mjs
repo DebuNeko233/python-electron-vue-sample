@@ -1,11 +1,12 @@
 /**
  * Integration check for the real, unpacked Windows Electron executable.
- * This is intentionally separate from smoke-backend.mjs: it tests Electron's
+ * This is intentionally separate from smoke/backend.mjs: it tests Electron's
  * packaged entrypoint and ownership of its own Python child process.
  */
 
 import assert from 'node:assert/strict'
-import { spawn, spawnSync } from 'node:child_process'
+import { spawn } from 'node:child_process'
+import { isWindowsPidAlive } from './helpers.mjs'
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
@@ -51,11 +52,7 @@ try {
   assert.equal(report.exitCode, 0, 'Electron reported a failed backend lifecycle')
   assert.ok(Number.isInteger(report.pythonPid) && report.pythonPid > 0)
 
-  const check = spawnSync('powershell.exe', [
-    '-NoProfile', '-NonInteractive', '-Command',
-    'if (Get-Process -Id ' + report.pythonPid + ' -ErrorAction SilentlyContinue) { exit 1 }',
-  ], { stdio: 'pipe', timeout: 5_000 })
-  assert.equal(check.status, 0, 'A managed Python process was left running')
+  assert.equal(isWindowsPidAlive(report.pythonPid), false, 'A managed Python process was left running')
   console.log('Packaged Electron smoke passed: launched Python, HTTP API, clean process exit')
 } finally {
   fs.rmSync(folder, { force: true, recursive: true })

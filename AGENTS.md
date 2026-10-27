@@ -50,14 +50,20 @@ Windows x64 桌面软件样例，不是某个具体业务软件。
 - **依赖策略**：仓库不提交 `pnpm-lock.yaml` 或 `backend/uv.lock`。pnpm 禁用锁文件；uv 可在本地生成被 Git 忽略的临时锁。依赖升级要执行 Windows 打包与测试，详见 [依赖管理](docs/dependencies.md)。
 - 保持可维护：优先短函数、清晰名称、小范围修改、真实示例，不新增无需求的框架。
 
+## 脚本目录
+
+`scripts/` 顶层仅放开发、环境引导、构建与清理入口；`scripts/tests/` 保存 Node 单元测试；`scripts/smoke/` 保存打包版真实进程测试；`scripts/lib/` 保存被复用的安全辅助函数。`pnpm dev:combined` 与 `pnpm dev` 共享 `scripts/dev.mjs`，修改启动逻辑必须同时验证两种模式。
+
 ## 常用命令（从仓库根目录执行）
 
 ~~~powershell
 pnpm install
 pnpm dev
+pnpm dev:combined
 pnpm dev:backend
 pnpm dev:frontend
 pnpm test:backend
+pnpm test:scripts
 pnpm typecheck
 pnpm test:scripts
 pnpm python:info

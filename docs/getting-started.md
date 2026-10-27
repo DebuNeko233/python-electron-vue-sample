@@ -27,7 +27,7 @@ pnpm install
 pnpm dev
 ~~~
 
-- Windows 下 `pnpm dev` 打开两个独立终端，分别运行 Python、Electron/Vue。
+- Windows 下 `pnpm dev` 打开两个独立终端，分别运行 Python、Electron/Vue；`pnpm dev:combined` 则使用一个终端统一运行两个进程。
 - Python 环境缺失时，uv 自动创建 `backend/.venv` 并安装依赖；没有 uv 时先执行项目本地引导。
 - 正常运行时页面显示 `Python ready`，侧边栏可以切换“应用概览、HTTP 示例、实时任务、IPC 示例”。
 - 如果 Electron 先起来而 Python 尚未就绪，等待后点击界面里的“重新连接”。

@@ -193,7 +193,7 @@ Select-String -Path .\electron.log -Pattern "ERROR|WARN"
 pnpm test:backend
 pnpm typecheck
 pnpm build
-node scripts/smoke-electron.mjs
+node scripts/smoke/electron.mjs
 ~~~
 
 CI 的打包版 Electron 冒烟测试还会验证

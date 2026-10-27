@@ -76,9 +76,9 @@ pnpm python:info
 开发机上的完整打包冒烟测试：
 
 ~~~powershell
-node scripts/smoke-backend.mjs
-node scripts/smoke-electron.mjs
-node scripts/smoke-parent-exit.mjs
+node scripts/smoke/backend.mjs
+node scripts/smoke/electron.mjs
+node scripts/smoke/parent-exit.mjs
 ~~~
 
 依次测试包内 Python、真实 Electron 调用及异常退出。它们不会自动覆盖 CUDA、摄像头驱动、厂商 SDK。

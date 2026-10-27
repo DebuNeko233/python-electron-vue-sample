@@ -4,6 +4,12 @@
 
 ## [Unreleased]
 
+### 脚本维护
+
+- 合并开发进程脚本：`pnpm dev` 仍在 Windows 打开独立终端，`pnpm dev:combined` 复用 `scripts/dev.mjs --combined`。
+- 将 Node 单元测试整理到 `scripts/tests/`，提供 `pnpm test:scripts` 统一执行；将打包冒烟测试整理到 `scripts/smoke/`，通过共享函数减少进程状态检查与清理代码重复。
+- 将 Windows 子进程参数校验模块移动到 `scripts/lib/`，保留安全回归测试。更新 CI 与文档引用，避免脚本迁移后出现失效命令。
+
 ### Electron 开发启动修复
 
 - 适配 Electron 42+ 的延迟下载机制：`pnpm dev:frontend` 和 `pnpm build` 启动前检查已安装的 Electron 版本、`path.txt` 和二进制路径，缺失时调用当前 Electron npm 包自带的官方 `install.js`，避免 `electron-vite` 抛出 `Error: Electron uninstall`。

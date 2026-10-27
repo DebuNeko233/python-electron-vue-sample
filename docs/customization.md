@@ -13,7 +13,7 @@
 | 示例项目的文字介绍 | `README.md`、相关页面/文档 |
 
 `productName` 改动会改变 EXE 名称，而目前部分 Windows smoke 脚本
-（`scripts/smoke-electron.mjs` 和 `scripts/smoke-parent-exit.mjs`）
+（`scripts/smoke/electron.mjs` 和 `scripts/smoke/parent-exit.mjs`）
 按 `SampleApp.exe` 查找发行文件；更名后必须同步修改这些脚本和 README。
 `appId` / 应用名的变化也可能改变 Windows 的用户数据目录。
 不要把持久业务数据放到 `dist/win-unpacked` 中。

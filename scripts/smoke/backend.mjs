@@ -10,6 +10,7 @@ import os from 'node:os'
 import path from 'node:path'
 import { setTimeout as pause } from 'node:timers/promises'
 import WebSocket from 'ws'
+import { waitForJsonFile, killWindowsPid } from './helpers.mjs'
 
 const release = path.resolve('dist/win-unpacked/resources/backend')
 const manifest = JSON.parse(fs.readFileSync(path.join(release, 'manifest.json'), 'utf8'))
@@ -39,19 +40,13 @@ let errors = ''
 child.stderr.on('data', data => { errors += data.toString() })
 
 async function waitReady() {
-  const deadline = Date.now() + 25_000
-  while (Date.now() < deadline) {
-    if (child.exitCode !== null) throw new Error('Python exited too early: ' + errors)
-    if (fs.existsSync(readyFile)) {
-      const ready = JSON.parse(fs.readFileSync(readyFile, 'utf8'))
-      if (ready.pid !== child.pid || ready.session_id !== sessionId) {
-        throw new Error('Mismatched Python readiness handshake')
-      }
-      return ready.port
-    }
-    await pause(100)
+  const ready = await waitForJsonFile(readyFile, {
+    child, timeoutMs: 25_000, label: 'Python startup', details: () => errors,
+  })
+  if (ready.pid !== child.pid || ready.session_id !== sessionId) {
+    throw new Error('Mismatched Python readiness handshake')
   }
-  throw new Error('Python startup timed out: ' + errors)
+  return ready.port
 }
 
 async function checkWebSocket(url) {
@@ -113,8 +108,7 @@ try {
 } finally {
   if (child.exitCode === null) {
     if (process.platform === 'win32' && child.pid) {
-      const { spawnSync } = await import('node:child_process')
-      spawnSync('taskkill', ['/PID', String(child.pid), '/T', '/F'], { stdio: 'ignore' })
+      killWindowsPid(child.pid, { tree: true })
     } else {
       child.kill('SIGKILL')
     }
