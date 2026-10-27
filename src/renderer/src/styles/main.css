@@ -61,3 +61,31 @@ button:disabled { cursor:not-allowed; opacity:.55; }
 a.nav-item { display:block; color:inherit; text-decoration:none; }
 a.nav-item:hover { color:#fff; background:#273958; }
 .panel-stack { display:flex; flex-direction:column; gap:20px; min-width:0; }
+
+/* Sidebar buttons are navigation controls, not dead hash links. */
+.sidebar .nav-item {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: 10px;
+  background: transparent;
+  color: #a6b4d2;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 400;
+}
+.sidebar .nav-item:hover {
+  background: #273958;
+  color: #fff;
+}
+.sidebar .nav-item.selected {
+  background: #273958;
+  color: #fff;
+  font-weight: 600;
+}
+.sidebar .nav-item:focus-visible {
+  outline: 2px solid #7a9aff;
+  outline-offset: 2px;
+}
+.nav-symbol { display: inline-block; width: 16px; text-align: center; }
+.panels.one-column { grid-template-columns: minmax(0, 1fr); }
