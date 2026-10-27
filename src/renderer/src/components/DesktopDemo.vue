@@ -1,25 +1,32 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { openLogDirectory, selectFile } from '../services/desktop'
+import type { LogTarget } from '../../../shared/bridge'
+import { createLogger } from '../services/logger'
 
 const selectedFile = ref('')
 const error = ref('')
+const log = createLogger('DesktopDemo')
 
 async function chooseFile(): Promise<void> {
   error.value = ''
   try {
-    selectedFile.value = (await selectFile()) ?? '已取消选择'
+    const chosen = await selectFile()
+    selectedFile.value = chosen ?? '已取消选择'
+    log.info(chosen === null ? 'File selection cancelled' : 'File selected')
   } catch (caught) {
     error.value = String(caught)
+    log.warn('File picker failed')
   }
 }
 
-async function openLogs(): Promise<void> {
+async function openLogs(target: LogTarget): Promise<void> {
   error.value = ''
   try {
-    await openLogDirectory()
+    await openLogDirectory(target)
   } catch (caught) {
     error.value = String(caught)
+    log.warn('Unable to open log directory')
   }
 }
 </script>
@@ -30,7 +37,10 @@ async function openLogs(): Promise<void> {
     <p class="description">文件选择由 Electron 主进程执行，Vue 不直接访问 Node.js。</p>
     <button class="secondary" @click="chooseFile">选择文件</button>
     <p class="small wrap-text">{{ selectedFile || '尚未选择文件' }}</p>
-    <button class="text-button" @click="openLogs">打开日志目录</button>
+    <div class="task-buttons">
+      <button class="text-button" @click="openLogs('electron')">打开前端日志</button>
+      <button class="text-button" @click="openLogs('python')">打开后端日志</button>
+    </div>
     <p v-if="error" class="error">{{ error }}</p>
   </section>
 </template>

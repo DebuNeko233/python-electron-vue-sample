@@ -85,9 +85,23 @@ function registerIpc(): void {
     const selection = await dialog.showOpenDialog(mainWindow!, { properties: ['openFile'] })
     return selection.canceled ? null : selection.filePaths[0]
   })
-  ipcMain.handle('system:open-logs', async (event) => {
+  ipcMain.handle('logging:write', (event, level: unknown, source: unknown, message: unknown) => {
     checkSender(event)
-    const directory = app.isPackaged
+    // Renderer content is untrusted: accept only short, single-line, text-only events.
+    if ((level !== 'info' && level !== 'warn' && level !== 'error') ||
+        typeof source !== 'string' || !/^[a-zA-Z][a-zA-Z0-9_.-]{0,39}$/.test(source) ||
+        typeof message !== 'string' || message.length < 1 || message.length > 1000 ||
+        /[\r\n\x00-\x1f\x7f]/.test(message)) {
+      throw new Error('Invalid renderer log entry')
+    }
+    console[level]('[renderer:' + source + ']', message)
+  })
+  ipcMain.handle('system:open-logs', async (event, target: unknown = 'python') => {
+    checkSender(event)
+    if (target !== 'python' && target !== 'electron') {
+      throw new Error('Invalid log target')
+    }
+    const directory = app.isPackaged || target === 'electron'
       ? path.join(app.getPath('userData'), 'data', 'logs')
       : path.join(os.homedir(), '.python-electron-vue-sample', 'logs')
     fs.mkdirSync(directory, { recursive: true })
@@ -223,6 +237,15 @@ async function runPackagedSmokeTest(): Promise<void> {
       })()`,
       true,
     )
+    // Exercise Renderer → Preload → Main → electron.log, not just console output.
+    await browser.webContents.executeJavaScript(
+      "window.desktop.logging.write('info', 'SmokeTest', 'Renderer log IPC roundtrip')",
+      true,
+    )
+    const electronLog = path.join(app.getPath('userData'), 'data', 'logs', 'electron.log')
+    if (!fs.readFileSync(electronLog, 'utf8').includes('[renderer:SmokeTest] Renderer log IPC roundtrip')) {
+      throw new Error('Renderer log was not persisted into electron.log')
+    }
     console.info('Packaged Electron and Python communication succeeded:', result)
     exitCode = 0
   } catch (error) {

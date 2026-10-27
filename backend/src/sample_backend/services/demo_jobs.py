@@ -5,6 +5,8 @@ from dataclasses import dataclass
 from typing import Awaitable, Callable
 from uuid import uuid4
 
+from loguru import logger
+
 Publish = Callable[[str, dict], Awaitable[None]]
 
 
@@ -26,6 +28,7 @@ class DemoJobs:
     def start(self) -> DemoJob:
         job = DemoJob(id=uuid4().hex)
         self._jobs[job.id] = job
+        logger.info('demo_job.started task_id={}', job.id)
         task = asyncio.create_task(self._run(job))
         self._tasks[job.id] = task
         task.add_done_callback(lambda _: self._tasks.pop(job.id, None))
@@ -54,9 +57,11 @@ class DemoJobs:
                     await asyncio.sleep(0.4)
             job.status = "completed"
             await self._publish("task.completed", {"task_id": job.id})
+            logger.info('demo_job.completed task_id={}', job.id)
         except asyncio.CancelledError:
             job.status = "cancelled"
             await self._publish("task.cancelled", {"task_id": job.id})
+            logger.info('demo_job.cancelled task_id={}', job.id)
             raise
 
     async def close(self) -> None:

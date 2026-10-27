@@ -19,9 +19,12 @@ const desktop: DesktopBridge = {
     diagnostics: () => ipcRenderer.invoke('backend:diagnostics'),
     retry: () => ipcRenderer.invoke('backend:retry'),
   },
+  logging: {
+    write: (level, source, message) => ipcRenderer.invoke('logging:write', level, source, message),
+  },
   system: {
     selectFile: () => ipcRenderer.invoke('system:select-file'),
-    openLogs: () => ipcRenderer.invoke('system:open-logs'),
+    openLogs: (target) => ipcRenderer.invoke('system:open-logs', target),
     closeWindow: () => ipcRenderer.invoke('system:close-window'),
   },
 }

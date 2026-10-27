@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { echoMessage } from '../services/backend-api'
+import { createLogger } from '../services/logger'
 
 defineProps<{ ready: boolean }>()
 
@@ -8,6 +9,7 @@ const input = ref('Hello from Vue!')
 const result = ref('还没有发送请求')
 const error = ref('')
 const sending = ref(false)
+const log = createLogger('EchoDemo')
 
 async function send(): Promise<void> {
   if (sending.value) return
@@ -16,8 +18,10 @@ async function send(): Promise<void> {
   try {
     const response = await echoMessage(input.value)
     result.value = response.message + ' · ' + response.from
+    log.info('HTTP echo succeeded')
   } catch (caught) {
     error.value = String(caught)
+    log.error('HTTP echo failed')
   } finally {
     sending.value = false
   }

@@ -7,6 +7,8 @@ export interface BackendEvent {
 }
 
 export type BackendStatus = 'starting' | 'ready' | 'offline' | 'stopping' | 'failed'
+export type LogLevel = 'info' | 'warn' | 'error'
+export type LogTarget = 'python' | 'electron'
 
 export interface DesktopBridge {
   backend: {
@@ -17,9 +19,12 @@ export interface DesktopBridge {
     diagnostics(): Promise<string>
     retry(): Promise<void>
   }
+  logging: {
+    write(level: LogLevel, source: string, message: string): Promise<void>
+  }
   system: {
     selectFile(): Promise<string | null>
-    openLogs(): Promise<void>
+    openLogs(target?: LogTarget): Promise<void>
     closeWindow(): Promise<void>
   }
 }

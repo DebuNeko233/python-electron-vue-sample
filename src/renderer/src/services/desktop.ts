@@ -4,6 +4,8 @@ export function selectFile(): Promise<string | null> {
   return window.desktop.system.selectFile()
 }
 
-export function openLogDirectory(): Promise<void> {
-  return window.desktop.system.openLogs()
+import type { LogTarget } from '../../../shared/bridge'
+
+export function openLogDirectory(target: LogTarget = 'python'): Promise<void> {
+  return window.desktop.system.openLogs(target)
 }
