@@ -10,6 +10,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { resolveProcessCommand } from './process-command.mjs'
+import { ensureUv } from './uv-bootstrap.mjs'
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const backend = path.join(root, 'backend')
@@ -18,10 +19,11 @@ const staging = path.join(buildRoot, 'backend-staging')
 const finalBackend = path.join(buildRoot, 'backend')
 const runtime = path.join(staging, 'runtime')
 const pythonVersion = fs.readFileSync(path.join(backend, '.python-version'), 'utf8').trim()
+let uv
 
 function run(command, args, options = {}) {
   console.log('[build]', command, ...args)
-  const processCommand = resolveProcessCommand(command, args)
+  const processCommand = resolveProcessCommand(command === 'uv' ? uv : command, args)
   const result = spawnSync(processCommand.command, processCommand.args, {
     cwd: root,
     stdio: 'inherit',
@@ -39,7 +41,7 @@ function run(command, args, options = {}) {
  */
 function findManagedPython() {
   const result = spawnSync(
-    'uv',
+    uv,
     ['python', 'find', '--managed-python', '--no-project', '--no-python-downloads', pythonVersion],
     { cwd: root, encoding: 'utf8', shell: false },
   )
@@ -91,6 +93,7 @@ fs.mkdirSync(staging, { recursive: true })
 const env = { ...process.env, UV_LINK_MODE: 'copy' }
 
 try {
+  uv = await ensureUv()
   // Resolve using pyproject.toml; uv may create an ignored, local uv.lock.
   // Keep the project .venv separate from the self-contained release runtime.
   run('uv', ['sync', '--project', backend])

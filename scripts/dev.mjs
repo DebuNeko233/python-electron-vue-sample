@@ -11,8 +11,17 @@ import { spawnSync } from 'node:child_process'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { windowsTerminalScript } from './windows-terminal.mjs'
+import { ensureUv } from './uv-bootstrap.mjs'
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
+
+// Bootstrap before launching separate terminals, so neither races the download.
+try {
+  await ensureUv()
+} catch (error) {
+  console.error('[dev] ' + error.message)
+  process.exit(1)
+}
 
 if (process.platform !== 'win32') {
   console.log('On this platform, pnpm dev runs both processes in one terminal.')

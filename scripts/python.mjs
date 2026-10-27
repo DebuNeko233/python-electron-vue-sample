@@ -7,6 +7,7 @@ import { spawnSync } from 'node:child_process'
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { ensureUv } from './uv-bootstrap.mjs'
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const backend = path.join(root, 'backend')
@@ -14,18 +15,20 @@ const environment = path.join(backend, '.venv')
 const command = process.argv[2] ?? 'setup'
 
 function run(args, options = {}) {
-  const result = spawnSync('uv', args, {
+  const result = spawnSync(uv, args, {
     cwd: backend,
     stdio: 'inherit',
     shell: false,
     ...options,
   })
   if (result.error) {
-    console.error('uv is required. Install it from https://docs.astral.sh/uv/getting-started/installation/')
+    console.error('Failed to launch uv: ' + result.error.message)
     process.exit(1)
   }
   if (result.status !== 0) process.exit(result.status ?? 1)
 }
+
+const uv = await ensureUv()
 
 switch (command) {
   case 'setup':
