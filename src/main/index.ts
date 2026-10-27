@@ -100,8 +100,9 @@ function registerIpc(): void {
   })
 }
 
-function createWindow(): void {
+function createWindow(show = true): BrowserWindow {
   mainWindow = new BrowserWindow({
+    show,
     width: 1200,
     height: 790,
     minWidth: 800,
@@ -129,7 +130,9 @@ function createWindow(): void {
   } else {
     void mainWindow.loadFile(path.join(mainDirectory, '../renderer/index.html'))
   }
+  const createdWindow = mainWindow
   mainWindow.on('closed', () => { mainWindow = null })
+  return createdWindow
 }
 
 async function startBackend(): Promise<void> {
@@ -173,7 +176,54 @@ async function runPackagedSmokeTest(): Promise<void> {
       message: string
     }
     if (echo.message !== 'Electron smoke test') throw new Error('Python HTTP echo mismatch')
-    console.info('Packaged Electron and Python communication succeeded')
+    // Also exercise the actual Vue sidebar, not just the Python transport.
+    registerIpc()
+    const browser = createWindow(false)
+    const result: unknown = await browser.webContents.executeJavaScript(
+      `(async () => {
+        const buttons = [...document.querySelectorAll('aside nav button')]
+        const expected = ['应用概览', 'HTTP 示例', '实时任务', 'IPC 示例']
+        if (buttons.length !== expected.length) {
+          throw new Error('Expected four sidebar buttons')
+        }
+
+        for (let index = 0; index < buttons.length; index++) {
+          buttons[index].click()
+          await new Promise((resolve) => setTimeout(resolve, 30))
+          const title = document.querySelector('h1')?.textContent?.trim()
+          const selected = document.querySelectorAll('aside nav button[aria-current="page"]')
+          if (title !== expected[index] || selected.length !== 1 ||
+              selected[0] !== buttons[index]) {
+            throw new Error('Sidebar did not navigate to ' + expected[index])
+          }
+        }
+
+        // The task component must remain mounted when switching between tabs.
+        buttons[2].click()
+        await new Promise((resolve) => setTimeout(resolve, 30))
+        const task = document.querySelector('#tasks')
+        const start = task?.querySelector('button')
+        if (!start) throw new Error('Task page has no start button')
+        start.click()
+
+        const deadline = Date.now() + 8_000
+        while (!task?.querySelector('.small')?.textContent?.includes('Task ID:')) {
+          if (Date.now() > deadline) throw new Error('Task did not start')
+          await new Promise((resolve) => setTimeout(resolve, 100))
+        }
+        const taskId = task.querySelector('.small').textContent
+        buttons[1].click()
+        await new Promise((resolve) => setTimeout(resolve, 30))
+        buttons[2].click()
+        await new Promise((resolve) => setTimeout(resolve, 30))
+        if (task.querySelector('.small')?.textContent !== taskId) {
+          throw new Error('Task state was discarded when navigating')
+        }
+        return 'Navigation and task state OK'
+      })()`,
+      true,
+    )
+    console.info('Packaged Electron and Python communication succeeded:', result)
     exitCode = 0
   } catch (error) {
     console.error('Packaged Electron smoke test failed:', error)
