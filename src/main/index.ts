@@ -2,6 +2,7 @@
 
 import { app, BrowserWindow, dialog, ipcMain, shell } from 'electron'
 import fs from 'node:fs'
+import os from 'node:os'
 import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { BackendManager } from './backend-manager'
@@ -86,7 +87,9 @@ function registerIpc(): void {
   })
   ipcMain.handle('system:open-logs', async (event) => {
     checkSender(event)
-    const directory = path.join(app.getPath('userData'), 'data', 'logs')
+    const directory = app.isPackaged
+      ? path.join(app.getPath('userData'), 'data', 'logs')
+      : path.join(os.homedir(), '.python-electron-vue-sample', 'logs')
     fs.mkdirSync(directory, { recursive: true })
     const error = await shell.openPath(directory)
     if (error) throw new Error(error)

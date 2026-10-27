@@ -18,3 +18,11 @@ Electron 日志位于 `data/logs/electron.log`。开发环境下 Python 日志�
 `.python-electron-vue-sample/logs`。
 
 坚持最小抽象：不将业务塞入 Electron，不增加无需求的插件系统、认证账号或 GPU 框架。
+
+## Diagnostics and task lifecycle
+
+`BackendManager` retains a human-readable startup/exit error and exposes a retry IPC method. A WebSocket connection shared by Electron Main forwards events to Vue. Stale close callbacks from replaced sockets must not mark a new connection offline.
+
+Demo tasks support start, status, and cancellation. A reconnecting renderer retrieves the authoritative task state through HTTP instead of guessing from missed WebSocket events.
+
+Windows CI exercises both graceful shutdown and forced Electron termination. The latter verifies the Python watchdog, not a forced child-process kill. Applications controlling physical hardware still require their own safety shutdown procedures.

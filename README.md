@@ -64,3 +64,10 @@ pnpm build
 Windows 的 GitHub Actions 成功运行后，可在该运行的 Artifacts 下载 `SampleApp-windows-x64`，解压后双击 `SampleApp.exe`。
 
 构建后的 Windows CI 还会启动真正的 `SampleApp.exe --smoke-test`（不打开窗口），验证 Electron 能启动内置 Python、完成 HTTP 通信并退出，检查 Python PID 不再存在。
+
+## 新增的可靠性功能
+
+- Python 连接中断时，界面显示原因并提供“重新连接”；独立开发后端仍由开发者控制。
+- HTTP 示例任务支持取消和状态查询，WebSocket 重连后会尝试重新同步任务进度。
+- 发行版可通过 `--smoke-test` 验证 Electron → Python 的启动、通信和正常退出；CI 还检测强制结束 Electron 后的 Python 自行退出。
+- 开发版的“打开日志目录”优先打开 Python 日志（`~/.python-electron-vue-sample/logs`）；打包版打开应用数据目录中的日志。

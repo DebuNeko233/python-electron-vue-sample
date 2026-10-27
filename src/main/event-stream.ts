@@ -47,7 +47,9 @@ export class EventStream {
       console.warn('Python WebSocket:', error.message)
     })
     socket.on('close', () => {
-      if (this.socket === socket) this.socket = null
+      // Ignore late close notifications from a connection that was replaced.
+      if (this.socket !== socket) return
+      this.socket = null
       this.backend.disconnected()
       this.retryLater()
     })
