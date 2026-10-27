@@ -1,10 +1,6 @@
 /**
- * Open two visible Windows command-prompt windows for development.
- *
- * Do not invoke cmd's "start" command through another cmd /c: nested quoting
- * makes a window title such as "Python backend" look like an executable path.
- * PowerShell Start-Process launches cmd.exe directly, with the working directory
- * set explicitly. Each child owns its console and prints its normal output.
+ * 统一开发启动器：Windows 默认分开两个终端；--combined 将前后端放进同一终端。
+ * 使用 PowerShell Start-Process 而非 cmd start，避免复杂路径的引号问题。
  */
 
 import { spawn, spawnSync } from 'node:child_process'
@@ -23,6 +19,7 @@ try {
   process.exit(1)
 }
 
+// 非 Windows 默认同终端运行，Windows 默认用两个可独立调试的窗口。
 const combinedMode = process.argv.includes('--combined') || process.platform !== 'win32'
 
 if (!combinedMode) {
@@ -39,6 +36,7 @@ for (const [title, script] of [
     command: packageRunner + ' ' + script,
     title,
   })
+  // PowerShell -EncodedCommand 需 UTF-16LE，保证包含特殊字符的路径正确传递。
   const encoded = Buffer.from(powershell, 'utf16le').toString('base64')
   const result = spawnSync(
     'powershell.exe',
@@ -59,6 +57,7 @@ console.log('Opened separate terminal windows for Python and Electron.')
   const children = []
   let closing = false
 
+  // combined 模式中任意一端退出都清理另一端，Windows 需清理进程树。
   function stop() {
     if (closing) return
     closing = true

@@ -1,7 +1,6 @@
 /**
- * Electron 42+ downloads its runtime on demand. electron-vite launches the
- * runtime directly, bypassing the "electron" CLI that would download it.
- * Ensure the official npm package's install.js has provisioned path.txt first.
+ * Electron 可执行文件可能在 pnpm install 后仍不存在；electron-vite 直接启动会失败。
+ * 检查当前包的运行时，缺失才执行其自带的官方 install.js。
  */
 import { spawnSync } from 'node:child_process'
 import fs from 'node:fs'
@@ -28,6 +27,7 @@ export function electronIsReady(directory, platform = process.platform) {
     const actualPath = fs.readFileSync(path.join(directory, 'path.txt'), 'utf8').trim()
     const binary = path.join(directory, 'dist', actualPath)
     const installedVersion = fs.readFileSync(path.join(directory, 'dist', 'version'), 'utf8').trim().replace(/^v/, '')
+    // 同时核对 path.txt、版本和实际二进制文件，不能只看 npm 包存在。
     return actualPath === executable && installedVersion === details.version && fs.existsSync(binary)
   } catch {
     return false
@@ -35,6 +35,7 @@ export function electronIsReady(directory, platform = process.platform) {
 }
 
 export function ensureElectron({ directory = electronPackageDirectory(), run = spawnSync, platform = process.platform } = {}) {
+  // 已安装正确版本就立即复用，不重复联网下载。
   if (electronIsReady(directory, platform)) return
 
   const installer = path.join(directory, 'install.js')
@@ -61,6 +62,7 @@ export function ensureElectron({ directory = electronPackageDirectory(), run = s
   console.info('[electron] Runtime ready')
 }
 
+// 支持被 build.mjs 导入，也支持 pnpm electron:setup 直接执行。
 if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
   try {
     ensureElectron()

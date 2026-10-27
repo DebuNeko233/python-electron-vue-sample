@@ -1,6 +1,6 @@
 /**
- * A small wrapper around uv.
- * The developer never needs to activate a virtual environment manually.
+ * 统一后端开发命令：自动选择 uv，在 backend 工作目录创建/复用虚拟环境。
+ * 不必手动激活 .venv，也不要直接执行含相对导入的 main.py。
  */
 
 import { spawnSync } from 'node:child_process'
@@ -16,6 +16,7 @@ const command = process.argv[2] ?? 'setup'
 
 function run(args, options = {}) {
   const result = spawnSync(uv, args, {
+    // 在 backend 下执行，uv 才能解析 pyproject.toml 和 .python-version。
     cwd: backend,
     stdio: 'inherit',
     shell: false,
@@ -28,6 +29,7 @@ function run(args, options = {}) {
   if (result.status !== 0) process.exit(result.status ?? 1)
 }
 
+// 全局无 uv 时自动使用项目 .tools/ 下经过校验的版本。
 const uv = await ensureUv()
 
 switch (command) {
@@ -44,12 +46,14 @@ switch (command) {
     // Do not delete anything except the project's own virtual environment.
     fs.rmSync(environment, { recursive: true, force: true })
     run(['python', 'install', version])
+    // 更新 .python-version 会影响开发和下一次绿色打包所选的解释器。
     run(['python', 'pin', version])
     run(['sync'])
     run(['run', 'python', '-c', 'import sys; print("Active Python:", sys.version)'])
     break
   }
   case 'run':
+    // 使用包入口 -m 以保留 from .api 等相对导入所需的包上下文。
     run(['run', 'python', '-m', 'sample_backend', '--dev'])
     break
   case 'test':

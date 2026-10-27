@@ -1,8 +1,6 @@
 /**
- * Locate uv via "uv self version"; if unavailable, bootstrap a verified binary
- * into this project's ignored .tools directory. Never alters PATH globally.
- *
- * Only developer scripts call this module. The packaged app does not use uv.
+ * 开发机先检测系统 uv；缺失时下载并校验官方压缩包，缓存到 .tools/。
+ * 不修改全局 PATH，也不会将 uv 放进绿色发行包。
  */
 import { spawnSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
@@ -11,6 +9,7 @@ import os from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
+// 固定的是本地引导工具版本，不是 Python 的版本。
 export const BOOTSTRAP_UV_VERSION = '0.13.5'
 export const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 
@@ -23,6 +22,7 @@ export function uvAsset(platform = process.platform, arch = process.arch) {
     'darwin-x64': 'uv-x86_64-apple-darwin.tar.gz',
     'darwin-arm64': 'uv-aarch64-apple-darwin.tar.gz',
   }
+  // 只能选择已支持架构对应的官方归档，不推测陌生平台的文件名。
   const result = targets[platform + '-' + arch]
   if (!result) {
     throw new Error('Automatic uv bootstrap is unsupported on ' + platform + '/' + arch +
@@ -44,6 +44,7 @@ export function checkUv(command, run = spawnSync) {
     /^uv\s+\d+\.\d+\.\d+/m.test((result.stdout || '') + (result.stderr || ''))
 }
 
+// 先校验 SHA-256，校验失败不能提取或执行归档中的文件。
 export function verifyUvArchive(bytes, checksumText) {
   const expected = checksumText.trim().match(/^([a-fA-F0-9]{64})(?:\s|$)/)?.[1]
   if (!expected) throw new Error('Malformed uv release checksum')
@@ -56,6 +57,7 @@ export function verifyUvArchive(bytes, checksumText) {
 async function download(url, fetcher = fetch) {
   const response = await fetcher(url, { signal: AbortSignal.timeout(90_000) })
   if (!response.ok) throw new Error('HTTP ' + response.status + ' while downloading ' + url)
+  // 除响应声明的大小外，还要在读取后检查真实字节长度。
   const length = Number(response.headers.get('content-length') || '0')
   if (length > 35 * 1024 * 1024) throw new Error('uv download exceeds 35 MiB')
   const bytes = Buffer.from(await response.arrayBuffer())
@@ -94,6 +96,7 @@ async function installUv(destination, platform, arch, options) {
   const temporary = fs.mkdtempSync(path.join(os.tmpdir(), 'sample-uv-'))
   try {
     console.info('[uv] Downloading uv ' + BOOTSTRAP_UV_VERSION + ' into project-local .tools/')
+    // 官方归档和校验文件都必须成功下载，不能只验证 HTTP 状态。
     const [archive, checksum] = await Promise.all([
       download(releaseRoot, options.fetcher),
       download(releaseRoot + '.sha256', options.fetcher),
@@ -106,6 +109,7 @@ async function installUv(destination, platform, arch, options) {
     if (!extracted) throw new Error('Official uv archive is missing the uv executable')
 
     fs.mkdirSync(path.dirname(destination), { recursive: true })
+    // 先写临时可执行文件再改名，防止其他进程读取未完成的副本。
     const staged = destination + '.new-' + process.pid
     fs.copyFileSync(extracted, staged)
     if (platform !== 'win32') fs.chmodSync(staged, 0o755)
@@ -134,6 +138,7 @@ export async function ensureUv(options = {}) {
   const arch = options.arch ?? process.arch
   const systemCommand = options.systemCommand ?? 'uv'
   const check = options.check ?? checkUv
+  // 全局存在可用 uv 就复用，本地安装是回退路径。
   if (check(systemCommand)) return systemCommand
 
   const destination = uvPath(root, platform, arch)
@@ -142,6 +147,7 @@ export async function ensureUv(options = {}) {
   // Don't silently treat a broken global uv as usable. Verify the local copy.
   uvAsset(platform, arch)
   fs.mkdirSync(path.dirname(destination), { recursive: true })
+  // 多个终端可能同时启动，排他锁确保只有一个下载者。
   const lock = destination + '.download-lock'
   const deadline = Date.now() + 150_000
   let owned = false
