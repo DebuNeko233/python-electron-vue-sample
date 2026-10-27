@@ -20,7 +20,7 @@ assert.ok(fs.existsSync(executable), 'Packaged SampleApp.exe was not built')
 const folder = fs.mkdtempSync(path.join(os.tmpdir(), 'sample-electron-smoke-'))
 const reportPath = path.join(folder, 'report.json')
 
-function launch(): Promise<number> {
+function launch() {
   return new Promise((resolve, reject) => {
     const child = spawn(executable, ['--smoke-test'], {
       windowsHide: true,
