@@ -62,3 +62,5 @@ pnpm build
 第一版聚焦 Windows x64 的通用软件；CUDA、摄像头驱动、厂商 SDK 和额外 DLL 需要业务项目单独测试。
 
 Windows 的 GitHub Actions 成功运行后，可在该运行的 Artifacts 下载 `SampleApp-windows-x64`，解压后双击 `SampleApp.exe`。
+
+构建后的 Windows CI 还会启动真正的 `SampleApp.exe --smoke-test`（不打开窗口），验证 Electron 能启动内置 Python、完成 HTTP 通信并退出，检查 Python PID 不再存在。

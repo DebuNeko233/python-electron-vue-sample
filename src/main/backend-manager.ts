@@ -41,6 +41,7 @@ export class BackendManager {
 
   get status(): BackendStatus { return this.currentStatus }
   get token(): string { return this.sessionToken }
+  get ownedPid(): number | null { return this.child?.pid ?? null }
 
   connected(): void { this.change('ready') }
   disconnected(): void {

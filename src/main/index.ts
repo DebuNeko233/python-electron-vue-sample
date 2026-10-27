@@ -129,9 +129,51 @@ app.on('before-quit', (event) => {
   })
 })
 
+/**
+ * Exercise the actual packaged Electron executable without opening a window.
+ * CI runs this after bundling, so it catches missing resources and startup bugs
+ * that testing python.exe alone cannot catch.
+ */
+async function runPackagedSmokeTest(): Promise<void> {
+  let exitCode = 1
+  let pythonPid: number | null = null
+  try {
+    if (!app.isPackaged) throw new Error('Packaged smoke test requires a release build')
+    await backend.start()
+    pythonPid = backend.ownedPid
+    if (backend.status !== 'ready') throw new Error('Python did not report READY')
+    const health = await backend.request('GET', '/api/health') as { status: string }
+    if (health.status !== 'ready') throw new Error('Python health check failed')
+    const echo = await backend.request('POST', '/api/echo', { message: 'Electron smoke test' }) as {
+      message: string
+    }
+    if (echo.message !== 'Electron smoke test') throw new Error('Python HTTP echo mismatch')
+    console.info('Packaged Electron and Python communication succeeded')
+    exitCode = 0
+  } catch (error) {
+    console.error('Packaged Electron smoke test failed:', error)
+  } finally {
+    await backend.stop()
+    const report = process.env.APP_SMOKE_REPORT
+    if (report) {
+      try {
+        fs.writeFileSync(report, JSON.stringify({ exitCode, pythonPid }), 'utf8')
+      } catch (error) {
+        console.error('Could not write smoke test report:', error)
+        exitCode = 1
+      }
+    }
+    app.exit(exitCode)
+  }
+}
+
 app.whenReady().then(() => {
   if (!app.hasSingleInstanceLock()) return
   installLogging()
+  if (process.argv.includes('--smoke-test')) {
+    void runPackagedSmokeTest()
+    return
+  }
   registerIpc()
   createWindow()
   void startBackend()

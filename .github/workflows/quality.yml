@@ -29,6 +29,8 @@ jobs:
       - run: pnpm build
       - name: Smoke-test packaged Python (HTTP / WebSocket / shutdown)
         run: node scripts/smoke-backend.mjs
+      - name: Smoke-test packaged Electron launcher and process cleanup
+        run: node scripts/smoke-electron.mjs
       - name: Upload portable Windows application
         uses: actions/upload-artifact@v4
         with:
