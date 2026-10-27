@@ -1,4 +1,4 @@
-"""Internal lifecycle endpoint; never expose an unauthenticated shutdown."""
+"""受保护的内部停机接口：仅允许本机请求携带独立控制令牌。"""
 
 import hmac
 
@@ -15,6 +15,7 @@ async def shutdown(
     background_tasks: BackgroundTasks,
     x_control_token: str = Header(default=""),
 ) -> dict:
+    # 访问业务 API 的会话令牌不能授权关闭整个后端。
     expected = control_token()
     if (
         not expected
@@ -27,5 +28,6 @@ async def shutdown(
     callback = getattr(request.app.state, "request_shutdown", None)
     if callback is None:
         raise HTTPException(status_code=503, detail="SHUTDOWN_UNAVAILABLE")
+    # 先给 Electron 返回 HTTP 响应，再调用关闭回调。
     background_tasks.add_task(callback)
     return {"accepted": True}

@@ -1,10 +1,11 @@
-"""A single place for environment-dependent backend settings."""
+"""统一管理运行配置；开发与 Electron 打包版分别使用对应的数据目录。"""
 
 import os
 from pathlib import Path
 
 
 def data_directory() -> Path:
+    # 打包版日志与数据存放在 userData，而非随程序分发的 resources。
     configured = os.environ.get("APP_DATA_DIR")
     if configured:
         return Path(configured).expanduser().resolve()
@@ -17,4 +18,5 @@ def session_token() -> str:
 
 
 def control_token() -> str:
+    """供内部停机接口校验，不能与业务会话令牌混用。"""
     return os.environ.get("APP_CONTROL_TOKEN", "")

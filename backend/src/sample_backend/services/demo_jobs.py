@@ -1,4 +1,4 @@
-"""One small, cancellable example of a background task."""
+"""可取消的示例任务：HTTP 存取状态，WebSocket 只广播实时变化。"""
 
 import asyncio
 from dataclasses import dataclass
@@ -27,10 +27,12 @@ class DemoJobs:
 
     def start(self) -> DemoJob:
         job = DemoJob(id=uuid4().hex)
+        # _jobs 持久保留本次进程内的任务状态；_tasks 仅持有活跃协程。
         self._jobs[job.id] = job
         logger.info('demo_job.started task_id={}', job.id)
         task = asyncio.create_task(self._run(job))
         self._tasks[job.id] = task
+        # 协程结束后清理引用，但继续允许前端通过任务 ID 查询最终状态。
         task.add_done_callback(lambda _: self._tasks.pop(job.id, None))
         return job
 
@@ -45,6 +47,7 @@ class DemoJobs:
         task = self._tasks.get(job_id)
         if task and not task.done():
             task.cancel()
+            # 等待取消事件广播完成后，才把最终状态返回给调用方。
             await asyncio.gather(task, return_exceptions=True)
         return job
 
@@ -59,6 +62,7 @@ class DemoJobs:
             await self._publish("task.completed", {"task_id": job.id})
             logger.info('demo_job.completed task_id={}', job.id)
         except asyncio.CancelledError:
+            # 取消也要写入最终状态并广播，然后继续传播取消异常。
             job.status = "cancelled"
             await self._publish("task.cancelled", {"task_id": job.id})
             logger.info('demo_job.cancelled task_id={}', job.id)
@@ -66,6 +70,7 @@ class DemoJobs:
 
     async def close(self) -> None:
         """All owned tasks are cancelled during FastAPI shutdown."""
+        # 复制任务快照；完成回调可能异步修改原字典。
         tasks = list(self._tasks.values())
         for task in tasks:
             task.cancel()
