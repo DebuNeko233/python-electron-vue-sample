@@ -24,8 +24,20 @@ for (const relativeFile of documents) {
     const file = path.join(root, relativeFile)
     const markdown = fs.readFileSync(file, 'utf8')
 
-    // This starter uses simple standard Markdown links in its handoff docs.
-    for (const match of markdown.matchAll(/(?<!!)\[[^\]]+\]\(([^)]+)\)/g)) {
+    // Ignore fenced code examples: JS such as arr[index](value) is not a Markdown link.
+    const prose = []
+    let fenceCharacter = null
+    for (const line of markdown.split(/\r?\n/)) {
+      const fence = line.match(/^\s*(`{3,}|~{3,})/)
+      if (fence) {
+        if (fenceCharacter === null) fenceCharacter = fence[1][0]
+        else if (fenceCharacter === fence[1][0]) fenceCharacter = null
+        continue
+      }
+      if (fenceCharacter === null) prose.push(line)
+    }
+
+    for (const match of prose.join('\n').matchAll(/(?<!!)\[[^\]]+\]\(([^)]+)\)/g)) {
       const url = match[1].trim()
       if (/^(?:https?:|mailto:|#)/i.test(url)) continue
       const relativeTarget = decodeURIComponent(url.split('#')[0].split('?')[0])
