@@ -27,6 +27,15 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm exec electron-vite build
       - run: pnpm build
+      - name: Verify the selected Python is cached without downloads
+        shell: pwsh
+        run: |
+          $version = (Get-Content backend/.python-version -Raw).Trim()
+          $python = uv python find --managed-python --no-project --no-python-downloads $version
+          if ($LASTEXITCODE -ne 0 -or !(Test-Path $python)) {
+            throw "The build did not reuse a persistent uv-managed Python installation"
+          }
+          Write-Output "Cached Python: $python"
       - name: Smoke-test packaged Python (HTTP / WebSocket / shutdown)
         run: node scripts/smoke-backend.mjs
       - name: Smoke-test packaged Electron launcher and process cleanup

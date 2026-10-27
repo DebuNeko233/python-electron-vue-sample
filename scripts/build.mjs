@@ -31,20 +31,52 @@ function run(command, args, options = {}) {
   }
 }
 
-function findPython(directory) {
-  // Prefer the installation's root interpreter, not Lib/venv/scripts/nt/python.exe.
-  const rootPython = path.join(directory, 'python.exe')
-  if (fs.existsSync(rootPython)) return rootPython
-  for (const name of fs.readdirSync(directory)) {
-    const filename = path.join(directory, name)
-    if (fs.statSync(filename).isDirectory()) {
-      const found = findPython(filename)
-      if (found) return found
-    } else if (name.toLowerCase() === 'python.exe') {
-      return filename
-    }
+/**
+ * Locate the Python version uv already installed on this computer.
+ * This lookup is offline and ignores the project's disposable .venv.
+ */
+function findManagedPython() {
+  const result = spawnSync(
+    'uv',
+    ['python', 'find', '--managed-python', '--no-project', '--no-python-downloads', pythonVersion],
+    { cwd: root, encoding: 'utf8', shell: false },
+  )
+  if (result.error) throw new Error('uv is required: ' + result.error.message)
+  if (result.status !== 0) return null
+
+  const executable = fs.realpathSync(result.stdout.trim())
+  if (path.basename(executable).toLowerCase() !== 'python.exe') {
+    throw new Error('uv returned an unexpected Python executable: ' + executable)
   }
-  return null
+  return executable
+}
+
+/**
+ * Install into uv's persistent user-level Python directory only once.
+ * Copy the interpreter from there into build/, so installing dependencies
+ * for the release cannot modify the cached original.
+ */
+function preparePythonRuntime() {
+  let sourcePython = findManagedPython()
+  if (!sourcePython) {
+    console.log('[build] Python ' + pythonVersion + ' is not cached; installing it once with uv.')
+    run('uv', ['python', 'install', pythonVersion])
+    sourcePython = findManagedPython()
+  }
+  if (!sourcePython) throw new Error('uv could not find Python ' + pythonVersion)
+
+  console.log('[build] Reusing local Python:', sourcePython)
+  fs.cpSync(path.dirname(sourcePython), runtime, {
+    recursive: true,
+    dereference: true,
+    force: true,
+  })
+
+  const packagedPython = path.join(runtime, 'python.exe')
+  if (!fs.existsSync(packagedPython)) {
+    throw new Error('The copied Python runtime has no python.exe')
+  }
+  return packagedPython
 }
 
 if (process.platform !== 'win32') {
@@ -54,14 +86,12 @@ if (process.platform !== 'win32') {
 fs.mkdirSync(buildRoot, { recursive: true })
 fs.rmSync(staging, { recursive: true, force: true })
 fs.mkdirSync(staging, { recursive: true })
-const env = { ...process.env, UV_PYTHON_INSTALL_DIR: runtime, UV_LINK_MODE: 'copy' }
+const env = { ...process.env, UV_LINK_MODE: 'copy' }
 
 try {
-  // uv.lock is generated once by uv sync and should be committed with the project.
+  // Lock dependencies, but keep the project .venv separate from the release.
   run('uv', ['sync', '--locked', '--project', backend])
-  run('uv', ['python', 'install', pythonVersion], { env })
-  const python = findPython(runtime)
-  if (!python) throw new Error('uv installed Python, but python.exe was not found')
+  const python = preparePythonRuntime()
 
   const requirements = path.join(staging, 'requirements.txt')
   run('uv', [
@@ -74,9 +104,8 @@ try {
   run('uv', ['pip', 'install', '--python', python, '--system', '--break-system-packages', '--no-deps', backend], { env })
   run(python, ['-I', '-c', 'import fastapi, uvicorn, loguru, sample_backend; print("Backend import passed")'])
 
-  // uv may create a version alias/junction that electron-builder does not copy.
-  // Store the real versioned path that will exist after packaging.
-  const relativePython = path.relative(staging, fs.realpathSync(python)).replaceAll('\\', '/')
+  // The packaged manifest points only to the self-contained release copy.
+  const relativePython = path.relative(staging, python).replaceAll('\\', '/')
   fs.writeFileSync(path.join(staging, 'manifest.json'), JSON.stringify({
     python: relativePython,
     python_version: pythonVersion,

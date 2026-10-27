@@ -71,3 +71,9 @@ Windows 的 GitHub Actions 成功运行后，可在该运行的 Artifacts 下载
 - HTTP 示例任务支持取消和状态查询，WebSocket 重连后会尝试重新同步任务进度。
 - 发行版可通过 `--smoke-test` 验证 Electron → Python 的启动、通信和正常退出；CI 还检测强制结束 Electron 后的 Python 自行退出。
 - 开发版的“打开日志目录”优先打开 Python 日志（`~/.python-electron-vue-sample/logs`）；打包版打开应用数据目录中的日志。
+
+## Python 构建缓存
+
+`pnpm build` 不会每次重新下载 Python。它先用 `uv python find` 检查当前用户的 **uv-managed Python**，如果已经安装，就直接复制一份到发布构建目录；只有第一次缺少指定版本时才会执行 `uv python install`。更改 `.python-version` 到尚未安装的版本时也可能需要下载一次。`pnpm clean` 只清理项目构建文件，**不会删除 uv 的全局 Python 安装或依赖缓存**。
+
+每次构建仍会重新生成干净的 Python 发行副本并安装项目依赖，避免发行包引用开发机路径或修改本机缓存的解释器。
