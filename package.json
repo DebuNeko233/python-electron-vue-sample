@@ -6,7 +6,7 @@
   "main": "./out/main/index.js",
   "scripts": {
     "dev": "node scripts/dev.mjs",
-    "dev:combined": "node scripts/combined.mjs",
+    "dev:combined": "node scripts/dev.mjs --combined",
     "dev:frontend": "node scripts/ensure-electron.mjs && electron-vite dev",
     "dev:backend": "node scripts/python.mjs run",
     "setup": "node scripts/python.mjs setup",
@@ -17,7 +17,8 @@
     "test:backend": "node scripts/python.mjs test",
     "build": "node scripts/build.mjs",
     "clean": "node scripts/clean.mjs",
-    "electron:setup": "node scripts/ensure-electron.mjs"
+    "electron:setup": "node scripts/ensure-electron.mjs",
+    "test:scripts": "node --test"
   },
   "dependencies": {
     "vue": "^3.5.44",

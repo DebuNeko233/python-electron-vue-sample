@@ -7,7 +7,7 @@
  * set explicitly. Each child owns its console and prints its normal output.
  */
 
-import { spawnSync } from 'node:child_process'
+import { spawn, spawnSync } from 'node:child_process'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { windowsTerminalScript } from './windows-terminal.mjs'
@@ -23,15 +23,9 @@ try {
   process.exit(1)
 }
 
-if (process.platform !== 'win32') {
-  console.log('On this platform, pnpm dev runs both processes in one terminal.')
-  const result = spawnSync(process.execPath, ['scripts/combined.mjs'], {
-    cwd: root,
-    stdio: 'inherit',
-  })
-  process.exit(result.status ?? 1)
-}
+const combinedMode = process.argv.includes('--combined') || process.platform !== 'win32'
 
+if (!combinedMode) {
 const packageRunner = (process.env.npm_config_user_agent ?? '').startsWith('pnpm/')
   ? 'pnpm run'
   : 'npm run'
@@ -59,3 +53,46 @@ for (const [title, script] of [
 }
 
 console.log('Opened separate terminal windows for Python and Electron.')
+
+} else {
+  // One console on macOS/Linux, or opt in using --combined on Windows.
+  const children = []
+  let closing = false
+
+  function stop() {
+    if (closing) return
+    closing = true
+    for (const child of children) {
+      if (!child.pid || child.exitCode !== null) continue
+      if (process.platform === 'win32') {
+        spawnSync('taskkill', ['/PID', String(child.pid), '/T', '/F'], { stdio: 'ignore' })
+      } else {
+        child.kill('SIGTERM')
+      }
+    }
+  }
+
+  function start(script) {
+    // Only the two known, hard-coded script names are sent to cmd.exe.
+    const child = process.platform === 'win32'
+      ? spawn('cmd.exe', ['/d', '/c', 'npm run ' + script], { cwd: root, stdio: 'inherit' })
+      : spawn('npm', ['run', script], { cwd: root, stdio: 'inherit' })
+    child.on('error', error => {
+      console.error('[dev] Cannot launch ' + script + ':', error)
+      process.exitCode = 1
+      stop()
+    })
+    child.on('exit', code => {
+      if (!closing) {
+        process.exitCode = code || 1
+        stop()
+      }
+    })
+    children.push(child)
+  }
+
+  process.once('SIGINT', stop)
+  process.once('SIGTERM', stop)
+  start('dev:backend')
+  start('dev:frontend')
+}
