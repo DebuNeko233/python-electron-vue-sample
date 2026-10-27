@@ -77,6 +77,14 @@ async def start_demo() -> dict:
     return {"task_id": job.id, "status": job.status}
 
 
+@app.post("/api/tasks/{job_id}/cancel")
+async def cancel_demo(job_id: str) -> dict:
+    job = await jobs.cancel(job_id)
+    if job is None:
+        raise HTTPException(status_code=404, detail="TASK_NOT_FOUND")
+    return {"task_id": job.id, "status": job.status, "progress": job.progress}
+
+
 @app.get("/api/tasks/{job_id}")
 async def get_demo(job_id: str) -> dict:
     job = jobs.get(job_id)

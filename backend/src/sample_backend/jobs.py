@@ -1,4 +1,4 @@
-"""One intentionally small example of a cancellable long-running task."""
+"""One small, cancellable example of a background task."""
 
 import asyncio
 from dataclasses import dataclass
@@ -16,21 +16,34 @@ class DemoJob:
 
 
 class DemoJobs:
+    """A job ID lets HTTP requests and WebSocket events refer to the same task."""
+
     def __init__(self, publish: Publish):
         self._publish = publish
         self._jobs: dict[str, DemoJob] = {}
-        self._tasks: set[asyncio.Task] = set()
+        self._tasks: dict[str, asyncio.Task[None]] = {}
 
     def start(self) -> DemoJob:
         job = DemoJob(id=uuid4().hex)
         self._jobs[job.id] = job
         task = asyncio.create_task(self._run(job))
-        self._tasks.add(task)
-        task.add_done_callback(self._tasks.discard)
+        self._tasks[job.id] = task
+        task.add_done_callback(lambda _: self._tasks.pop(job.id, None))
         return job
 
     def get(self, job_id: str) -> DemoJob | None:
         return self._jobs.get(job_id)
+
+    async def cancel(self, job_id: str) -> DemoJob | None:
+        """Cancellation waits until the worker publishes its final state."""
+        job = self.get(job_id)
+        if job is None:
+            return None
+        task = self._tasks.get(job_id)
+        if task and not task.done():
+            task.cancel()
+            await asyncio.gather(task, return_exceptions=True)
+        return job
 
     async def _run(self, job: DemoJob) -> None:
         try:
@@ -47,7 +60,9 @@ class DemoJobs:
             raise
 
     async def close(self) -> None:
-        for task in tuple(self._tasks):
+        """All owned tasks are cancelled during FastAPI shutdown."""
+        tasks = list(self._tasks.values())
+        for task in tasks:
             task.cancel()
-        if self._tasks:
-            await asyncio.gather(*self._tasks, return_exceptions=True)
+        if tasks:
+            await asyncio.gather(*tasks, return_exceptions=True)
