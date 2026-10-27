@@ -11,6 +11,7 @@ import { fileURLToPath } from 'node:url'
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const documents = [
   'README.md',
+  'CHANGELOG.md',
   'AGENTS.md',
   'backend/README.md',
   ...fs.readdirSync(path.join(root, 'docs'))
