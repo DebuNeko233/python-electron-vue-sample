@@ -189,9 +189,37 @@ async function runPackagedSmokeTest(): Promise<void> {
   }
 }
 
+/**
+ * The companion integration test kills this Electron process with taskkill /F,
+ * WITHOUT terminating its children. The Python parent watchdog must detect
+ * that exit and shut down independently.
+ */
+async function runParentExitSmokeTest(): Promise<void> {
+  try {
+    if (!app.isPackaged) throw new Error('Requires a packaged Electron executable')
+    const report = process.env.APP_SMOKE_REPORT
+    if (!report) throw new Error('Missing APP_SMOKE_REPORT')
+    await backend.start()
+    if (backend.status !== 'ready' || !backend.ownedPid) {
+      throw new Error('Python backend failed to start')
+    }
+    fs.writeFileSync(report, JSON.stringify({ pythonPid: backend.ownedPid }), 'utf8')
+    // Keep the main process alive until the test kills it using taskkill /F.
+    setInterval(() => {}, 5_000)
+  } catch (error) {
+    console.error('Parent-exit test setup failed:', error)
+    await backend.stop()
+    app.exit(1)
+  }
+}
+
 app.whenReady().then(() => {
   if (!app.hasSingleInstanceLock()) return
   installLogging()
+  if (process.argv.includes('--smoke-parent-exit')) {
+    void runParentExitSmokeTest()
+    return
+  }
   if (process.argv.includes('--smoke-test')) {
     void runPackagedSmokeTest()
     return
