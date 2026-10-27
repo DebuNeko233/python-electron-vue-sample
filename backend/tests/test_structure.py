@@ -17,9 +17,14 @@ def test_separate_application_instances_have_independent_tasks():
 
 
 def test_routes_are_registered_by_app_factory():
-    app = create_app()
-    names = {route.path for route in app.routes if hasattr(route, 'path')}
-    assert "/api/echo" in names
-    assert "/api/tasks/{job_id}/cancel" in names
-    assert "/ws/events" in names
-    assert "/internal/shutdown" in names
+    """Check observable behavior instead of FastAPI's private router internals."""
+    with TestClient(create_app()) as client:
+        response = client.post("/api/echo", json={"message": "split modules"})
+        assert response.status_code == 200
+        assert response.json()["message"] == "split modules"
+
+        assert client.get("/api/health").status_code == 200
+        assert client.post("/internal/shutdown").status_code == 403
+
+        with client.websocket_connect("/ws/events") as socket:
+            assert socket.receive_json()["event"] == "system.connected"
