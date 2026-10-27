@@ -18,7 +18,7 @@ def test_separate_application_instances_have_independent_tasks():
 
 def test_routes_are_registered_by_app_factory():
     app = create_app()
-    names = {route.path for route in app.routes}
+    names = {route.path for route in app.routes if hasattr(route, 'path')}
     assert "/api/echo" in names
     assert "/api/tasks/{job_id}/cancel" in names
     assert "/ws/events" in names
