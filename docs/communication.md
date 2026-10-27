@@ -101,7 +101,8 @@ Vue 组件
 | `backend.diagnostics()` | 获取后端诊断信息 |
 | `backend.retry()` | 重新连接/重启受托管后端 |
 | `system.selectFile()` | 打开文件选择对话框 |
-| `system.openLogs()` | 打开日志目录 |
+| `logging.write(level, source, message)` | Renderer 经认证 IPC 写入 Electron 文件日志 |
+| `system.openLogs('electron' / 'python')` | 分别打开前端或后端日志目录 |
 | `system.closeWindow()` | 关闭应用窗口 |
 
 不要将整个 `ipcRenderer`、文件系统对象、Node.js 或 Python 控制密钥暴露给 Vue。
@@ -125,7 +126,7 @@ Vue 组件
 资源组装由 `scripts/build.mjs`、`electron-builder.yml` 完成。
 
 生产主进程在 `APP_DATA_DIR` 指向的数据目录保存 Python 日志和其他数据。
-相关路径和排错见 [常见问题](troubleshooting.md)。
+相关日志接口、级别与敏感信息处理见 [日志指南](logging.md)，路径和排错见 [常见问题](troubleshooting.md)。
 
 ## 不属于当前模板的保证
 

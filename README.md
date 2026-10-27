@@ -77,6 +77,7 @@ backend/src/sample_backend/
 | [目录规范](docs/project-structure.md) | 代码应放在哪个模块 |
 | [扩展功能教程](docs/extend-features.md) | 完整新增一个 Python + Vue 业务功能 |
 | [项目定制](docs/customization.md) | 应用名称、Python 依赖与发行资源 |
+| [日志规范](docs/logging.md) | 前后端日志写法、级别、保存位置与敏感信息规范 |
 | [故障排查](docs/troubleshooting.md) | 常见问题及日志位置 |
 | [AI 开发约定](AGENTS.md) | AI 或新开发者接手项目的规范 |
 | [更新日志](CHANGELOG.md) | 版本历史、功能调整与修复记录 |

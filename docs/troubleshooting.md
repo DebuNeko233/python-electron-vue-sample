@@ -81,6 +81,8 @@ node scripts/smoke-parent-exit.mjs
 
 ## 日志放在哪里？
 
+完整写法、级别、日志保存和隐私规范见 [日志指南](logging.md)。
+
 - 开发后端：`%USERPROFILE%\.python-electron-vue-sample\logs\backend.log`。
 - 绿色版后端：Electron `app.getPath('userData')/data/logs/backend.log`。
 - 绿色版 Electron：同目录 `electron.log`。

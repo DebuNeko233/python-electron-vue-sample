@@ -4,6 +4,13 @@
 
 ## [Unreleased]
 
+### 功能与文档
+
+- 增加 Vue Renderer 统一日志工具，通过受限 IPC 写入 Electron 的 `electron.log`；HTTP 与文件选择示例演示日志用法。
+- 开发模式下分别提供打开前端与后端日志目录的入口；Python 任务示例补充启动、完成、取消事件日志。
+- 新增面向人类和 AI 的日志使用与规范文档，明确级别、轮转、存储位置、错误处理和敏感信息禁录约定。
+- 打包版 Electron 冒烟测试增加 Renderer 日志落盘验证。
+
 ### 修复
 
 - 修复 Windows 下 `pnpm build` 调用 pnpm/npm 时的 Node.js `[DEP0190]` 弃用警告：不再向 `shell: true` 的子进程传入参数数组，改为受限参数的显式 `cmd.exe` 调用，并补充 Windows 回归测试。

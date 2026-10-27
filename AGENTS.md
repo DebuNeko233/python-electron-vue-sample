@@ -12,9 +12,10 @@ Windows x64 桌面软件样例，不是某个具体业务软件。
 2. [通信协议](docs/communication.md)：Renderer/Preload/Main/Python 真实调用链与认证边界。
 3. [目录约定](docs/project-structure.md)：每个文件夹的职责。
 4. [完整新增业务练习](docs/extend-features.md)：可复制的 Service → API → TS → Vue → 测试。
-5. [排错手册](docs/troubleshooting.md)：按责任模块定位问题。
-6. [定制与限制](docs/customization.md)：应用标识、资源、依赖、Python 版本。
-7. [架构说明](docs/architecture.md)：进程所有权、数据目录、运行状态。
+5. [日志规范](docs/logging.md)：Vue/Electron/Python 的日志接口、级别和隐私规则。
+6. [排错手册](docs/troubleshooting.md)：按责任模块定位问题。
+7. [定制与限制](docs/customization.md)：应用标识、资源、依赖、Python 版本。
+8. [架构说明](docs/architecture.md)：进程所有权、数据目录、运行状态。
 
 先阅读相关代码再改；不要猜测本仓库已经拥有数据库、插件系统或 GPU 构建器。
 
@@ -29,6 +30,7 @@ Windows x64 桌面软件样例，不是某个具体业务软件。
 | 新桌面权限 | `src/main/index.ts`、`src/preload/index.ts`、`src/shared/bridge.ts`、`services/desktop.ts` |
 | 改 Python 版本或依赖 | `backend/.python-version`、`backend/pyproject.toml`、`backend/uv.lock` |
 | 打包路径、便携目录 | `scripts/build.mjs`、`electron-builder.yml`、`src/main/backend-manager.ts` |
+| 前端/后端日志 | `src/renderer/src/services/logger.ts`、`src/main/logging.ts`、`backend/src/sample_backend/core/logging.py`；完整规范见 [日志指南](docs/logging.md) |
 | Python 启动与退出 | `src/main/backend-manager.ts`、`backend/src/sample_backend/__main__.py` |
 
 ## 不可破坏的契约
@@ -41,6 +43,7 @@ Windows x64 桌面软件样例，不是某个具体业务软件。
 - WebSocket **不持久化**历史；关键状态必须有可查询的 HTTP API。
 - 退出顺序要保留优雅关闭与超时清理；实际运动设备还要有独立硬件安全措施。
 - 开发 `backend/.venv` 不参与打包；发行版用 uv 的 Python 缓存复制新目录，不能每次重新下载已安装的相同解释器。
+- **日志规范**：Renderer 使用 `createLogger(模块名)`，Main 使用 `console.info/warn/error`，Python 使用 Loguru；只记录必要状态、错误和关联 ID，不记录密钥、用户输入或文件原始路径。详见 [日志规范](docs/logging.md)。
 - 保持可维护：优先短函数、清晰名称、小范围修改、真实示例，不新增无需求的框架。
 
 ## 常用命令（从仓库根目录执行）
