@@ -28,7 +28,7 @@ Windows x64 桌面软件样例，不是某个具体业务软件。
 | Python 算法、后台任务 | `backend/src/sample_backend/services/`，并在 `api/` 暴露接口 |
 | WebSocket 事件 | `services/event_hub.py`、Python 业务 Service、前端 `composables/` |
 | 新桌面权限 | `src/main/index.ts`、`src/preload/index.ts`、`src/shared/bridge.ts`、`services/desktop.ts` |
-| 改 Python 版本或依赖 | `backend/.python-version`、`backend/pyproject.toml`、`backend/uv.lock` |
+| 改 Python 版本或依赖 | `backend/.python-version`、`backend/pyproject.toml`（本地 `backend/uv.lock` 不提交） |
 | 打包路径、便携目录 | `scripts/build.mjs`、`electron-builder.yml`、`src/main/backend-manager.ts` |
 | 前端/后端日志 | `src/renderer/src/services/logger.ts`、`src/main/logging.ts`、`backend/src/sample_backend/core/logging.py`；完整规范见 [日志指南](docs/logging.md) |
 | Python 启动与退出 | `src/main/backend-manager.ts`、`backend/src/sample_backend/__main__.py` |
@@ -44,6 +44,7 @@ Windows x64 桌面软件样例，不是某个具体业务软件。
 - 退出顺序要保留优雅关闭与超时清理；实际运动设备还要有独立硬件安全措施。
 - 开发 `backend/.venv` 不参与打包；发行版用 uv 的 Python 缓存复制新目录，不能每次重新下载已安装的相同解释器。
 - **日志规范**：Renderer 使用 `createLogger(模块名)`，Main 使用 `console.info/warn/error`，Python 使用 Loguru；只记录必要状态、错误和关联 ID，不记录密钥、用户输入或文件原始路径。详见 [日志规范](docs/logging.md)。
+- **依赖策略**：仓库不提交 `pnpm-lock.yaml` 或 `backend/uv.lock`。pnpm 禁用锁文件；uv 可在本地生成被 Git 忽略的临时锁。依赖升级要执行 Windows 打包与测试，详见 [依赖管理](docs/dependencies.md)。
 - 保持可维护：优先短函数、清晰名称、小范围修改、真实示例，不新增无需求的框架。
 
 ## 常用命令（从仓库根目录执行）

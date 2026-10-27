@@ -4,6 +4,11 @@
 
 ## [Unreleased]
 
+### 依赖策略
+
+- 将模板调整为**无跟踪锁文件模式**：移除 `pnpm-lock.yaml` 和 `backend/uv.lock`，禁用 pnpm 锁文件生成，允许 uv 仅在本地生成被忽略的依赖解析文件；`pnpm build` 与 CI 不再要求 `--locked` 或 `--frozen-lockfile`。
+- 保留 `package.json`、`backend/pyproject.toml` 的兼容版本约束，通过自动测试、Windows 绿色打包和实际进程测试验证依赖升级；新增 [依赖管理指南](docs/dependencies.md)。
+
 ### 功能与文档
 
 - 增加 Vue Renderer 统一日志工具，通过受限 IPC 写入 Electron 的 `electron.log`；HTTP 与文件选择示例演示日志用法。

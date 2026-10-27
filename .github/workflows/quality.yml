@@ -20,8 +20,8 @@ jobs:
         with:
           version: '0.13.5'
       - run: corepack enable
-      - run: pnpm install --frozen-lockfile
-      - run: uv sync --locked --project backend --group dev
+      - run: pnpm install --no-lockfile
+      - run: uv sync --project backend --group dev
       - run: uv run --project backend pytest -q
       - run: node --test scripts/process-command.test.mjs
       - run: node --test scripts/docs.test.mjs
@@ -73,8 +73,8 @@ jobs:
         with:
           version: '0.13.5'
       - run: corepack enable
-      - run: pnpm install --frozen-lockfile
-      - run: uv sync --locked --project backend --group dev
+      - run: pnpm install --no-lockfile
+      - run: uv sync --project backend --group dev
       - run: uv run --project backend pytest -q
       - run: node --test scripts/process-command.test.mjs
       - run: node --test scripts/docs.test.mjs

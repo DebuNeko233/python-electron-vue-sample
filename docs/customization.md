@@ -28,14 +28,15 @@ smoke 测试都依赖这个模块名。业务项目通常无须修改内部模�
 编辑 `backend/pyproject.toml` 的 `dependencies`，然后在根目录运行：
 
 ~~~powershell
-uv lock --project backend
+uv lock --project backend --upgrade
 uv sync --project backend
 pnpm test:backend
 pnpm build
 ~~~
 
-将 `backend/pyproject.toml` 和 `backend/uv.lock` 一起提交。
-不要复制开发 `.venv`。`pnpm build` 安装锁定的正式依赖并构建独立 CPython 运行时。
+只需要提交 `backend/pyproject.toml`；本地自动生成的 `backend/uv.lock` 被 Git 忽略。
+不要复制开发 `.venv`。`pnpm build` 根据兼容版本范围装配正式依赖并构建独立 CPython 运行时。
+详细策略见 [依赖管理](dependencies.md)。
 
 如果包包含原生 DLL、GPU、OpenCV/PyTorch 或硬件 SDK，
 还需检查资源装配、第三方许可证以及无开发环境 Windows 电脑的实际运行情况。

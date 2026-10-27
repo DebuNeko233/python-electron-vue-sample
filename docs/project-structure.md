@@ -129,3 +129,7 @@ Python 路由应短小，复杂业务放在 `services/`。
 - [完整业务扩展](extend-features.md)
 - [打包和依赖定制](customization.md)
 - [排错手册](troubleshooting.md)
+
+## 依赖管理
+
+模板不提交 pnpm 或 uv 的 lock 文件。请按 [依赖管理指南](dependencies.md) 中的版本范围与兼容性流程更新依赖。

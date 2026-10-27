@@ -12,3 +12,7 @@ backend/.pytest_cache/
 .idea/
 .vscode/
 .DS_Store
+
+# This starter resolves compatible dependencies from version ranges.
+pnpm-lock.yaml
+backend/uv.lock

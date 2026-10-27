@@ -120,5 +120,5 @@ pnpm python:use 3.12
 - 会运行 Python 测试和 TypeScript 检查，也会查看日志排错。
 - 不依赖前述聊天记录，能独立添加、测试、打包一个小功能。
 
-继续阅读：[目录约定](project-structure.md) · [通信协议](communication.md) ·
+继续阅读：[依赖管理](dependencies.md) · [目录约定](project-structure.md) · [通信协议](communication.md) ·
 [业务扩展实战](extend-features.md) · [常见问题](troubleshooting.md)。

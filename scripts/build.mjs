@@ -91,13 +91,14 @@ fs.mkdirSync(staging, { recursive: true })
 const env = { ...process.env, UV_LINK_MODE: 'copy' }
 
 try {
-  // Lock dependencies, but keep the project .venv separate from the release.
-  run('uv', ['sync', '--locked', '--project', backend])
+  // Resolve using pyproject.toml; uv may create an ignored, local uv.lock.
+  // Keep the project .venv separate from the self-contained release runtime.
+  run('uv', ['sync', '--project', backend])
   const python = preparePythonRuntime()
 
   const requirements = path.join(staging, 'requirements.txt')
   run('uv', [
-    'export', '--project', backend, '--locked', '--no-dev',
+    'export', '--project', backend, '--no-dev',
     '--no-emit-project', '--format', 'requirements-txt', '--output-file', requirements,
   ])
   // This interpreter is a fresh, project-owned copy inside build/, never a system Python.
