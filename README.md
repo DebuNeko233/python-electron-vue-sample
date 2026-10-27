@@ -23,7 +23,7 @@ pnpm install
 pnpm dev
 ```
 
-启动后可在界面中尝试 **HTTP 回显、WebSocket 任务进度及取消、Electron 文件选择** 等示例。
+启动后可在界面中尝试 **HTTP 回显、WebSocket 任务进度及取消、Electron 文件选择** 等示例。需要自己分别启动两个服务时，查看 [前后端手动启动指南](docs/manual-start.md)。
 
 ## 常用命令
 
@@ -77,6 +77,7 @@ backend/src/sample_backend/
 | 文档 | 内容 |
 | --- | --- |
 | [快速上手](docs/getting-started.md) | 首次运行与示例操作 |
+| [分别手动启动前后端](docs/manual-start.md) | 两个终端启动、纯 uv/Uvicorn 启动、路径与常见错误 |
 | [架构与通信协议](docs/communication.md) | Vue、Electron、Python 的通信过程 |
 | [目录规范](docs/project-structure.md) | 代码应放在哪个模块 |
 | [扩展功能教程](docs/extend-features.md) | 完整新增一个 Python + Vue 业务功能 |

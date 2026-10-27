@@ -32,15 +32,24 @@ pnpm dev
 - 正常运行时页面显示 `Python ready`，侧边栏可以切换“应用概览、HTTP 示例、实时任务、IPC 示例”。
 - 如果 Electron 先起来而 Python 尚未就绪，等待后点击界面里的“重新连接”。
 
-想独立调试时，在两个终端分别使用：
+想**手动分别启动前后端**时，请打开两个独立的 PowerShell 窗口，均从项目根目录执行：
+
+**终端 1 · Python FastAPI 后端：**
 
 ~~~powershell
 pnpm dev:backend
+~~~
+
+**终端 2 · Electron + Vue 前端：**
+
+~~~powershell
 pnpm dev:frontend
 ~~~
 
-开发模式 Python 使用 `127.0.0.1:8765`，可以独立运行，**关闭 Electron 不会关闭它**。
-需要时在 Python 终端按 Ctrl+C 结束后端。
+后端开发模式使用 `127.0.0.1:8765`；单独关闭 Electron **不会结束**后端进程，各终端可以用 `Ctrl+C` 结束。
+
+如果希望**完全独立使用 uv 命令**启动 Python，也可以从 `backend/` 目录执行 `uv run python -m sample_backend --dev`（不要直接运行 `main.py`）。
+工作目录区别、Uvicorn 入口、未预装 uv 时的用法和 `Electron uninstall` 处理方法详见 [分别手动启动前后端](manual-start.md)。
 
 ## 2. 不读源码也能执行的四个实验
 

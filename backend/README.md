@@ -2,7 +2,7 @@
 
 This is an installable Python package. You can run it independently from Electron.
 
-从仓库根目录运行：
+从仓库根目录运行（**无需预装 uv**，脚本自动检测/下载）：
 
 ~~~powershell
 pnpm dev:backend
@@ -10,6 +10,20 @@ pnpm test:backend
 pnpm python:info
 pnpm python:use 3.11
 ~~~
+
+也可以在 **`backend/` 目录**直接手动启动（此方式要求 `uv` 已可在 PATH 中调用）：
+
+~~~powershell
+uv run python -m sample_backend --dev
+~~~
+
+或使用 Uvicorn：
+
+~~~powershell
+uv run uvicorn sample_backend.main:app --host 127.0.0.1 --port 8765 --reload
+~~~
+
+**不要在 `src/sample_backend/` 里运行 `uv run .\main.py`**：`main.py` 的 `from .api...` 相对导入需要包上下文，必须通过 `-m sample_backend` 或 `sample_backend.main:app` 加载。两种手动启动方式只能任选其一，以免占用相同端口。参见 [前后端分别手动启动指南](../docs/manual-start.md)。
 
 - `src/sample_backend/__main__.py`：命令行启动、开发热重载、发行版就绪文件与父进程监测。
 - `src/sample_backend/main.py`：FastAPI 应用工厂、中间件、lifespan、Service 装配。

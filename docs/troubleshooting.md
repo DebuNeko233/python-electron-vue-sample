@@ -29,7 +29,7 @@ pnpm dev:frontend
 
 ## 开发启动失败
 
-尝试在不同 PowerShell 终端分别执行：
+手动分别启动前后端的完整步骤见 [手动启动指南](manual-start.md)。尝试在不同 PowerShell 终端（均位于项目根目录）分别执行：
 
 ~~~powershell
 pnpm dev:backend
@@ -41,6 +41,17 @@ pnpm dev:frontend
 ~~~powershell
 pnpm test:scripts
 ~~~
+
+## 直接运行 main.py 时 ImportError
+
+不要在 `backend/src/sample_backend/` 执行 `uv run .\main.py`。这是包内模块，带有 `from .api...` 相对导入；请回到 `backend/` 后运行：
+
+~~~powershell
+cd backend
+uv run python -m sample_backend --dev
+~~~
+
+如果当前已经在 `backend/src/sample_backend/`，先运行 `cd ..\..`。若系统无法识别 `uv`，从**项目根目录**运行 `pnpm dev:backend`，由脚本使用已安装或自动下载的 uv。详见 [手动启动指南](manual-start.md)。
 
 ## Python offline
 

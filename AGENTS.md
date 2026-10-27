@@ -8,7 +8,7 @@ Windows x64 桌面软件样例，不是某个具体业务软件。
 
 ## 新接手时先读什么？
 
-1. [快速上手](docs/getting-started.md)：安装、运行、体验每种通信、测试和构建。
+1. [快速上手](docs/getting-started.md)：安装、运行、体验每种通信、测试和构建；需要在两个终端分别手动启动时查看 [启动指南](docs/manual-start.md)。
 2. [通信协议](docs/communication.md)：Renderer/Preload/Main/Python 真实调用链与认证边界。
 3. [目录约定](docs/project-structure.md)：每个文件夹的职责。
 4. [完整新增业务练习](docs/extend-features.md)：可复制的 Service → API → TS → Vue → 测试。
@@ -65,7 +65,6 @@ pnpm dev:frontend
 pnpm test:backend
 pnpm test:scripts
 pnpm typecheck
-pnpm test:scripts
 pnpm python:info
 pnpm python:use 3.11
 pnpm build

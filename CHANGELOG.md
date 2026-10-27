@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+### 文档补充
+
+- 新增 [前后端分别手动启动指南](docs/manual-start.md)，写明双 PowerShell 终端独立启动、在 `backend/` 通过 `uv run python -m sample_backend --dev` 或 Uvicorn 启动、Electron 直接运行以及停止和排错步骤；解释为什么直接运行 `main.py` 会触发相对导入错误。
+
 ### 脚本维护
 
 - 合并开发进程脚本：`pnpm dev` 仍在 Windows 打开独立终端，`pnpm dev:combined` 复用 `scripts/dev.mjs --combined`。
